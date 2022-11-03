@@ -29,7 +29,9 @@ if plotShadedSEM
     clear p
 end
 
-xline([0 sig.stim_dur],':',{'stim ON', 'stim OFF'});
+%xline([0 sig.stim_dur],':',{'stim ON', 'stim OFF'});
+xline(0,':','stim ON');
+xline(sig.stim_dur,':','stim OFF');
 xlabel('time [s]')
 ylabel('\DeltaF/F')
 legend(num2str(stimValues));
