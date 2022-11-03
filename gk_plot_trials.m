@@ -22,9 +22,14 @@ p = plot(sig.t,sigMean);
 if plotShadedSEM
     Ntrials = size(sig.trials,3);    
     sigSEM  = squeeze(std(sig.trials_dF_F(roiNum,:,:,:),0,3)./sqrt(Ntrials));
-    for tr=1:numel(stimValues)
-        shadedErrorBar(sig.t,sigMean(:,tr),sigSEM(:,tr),...
-            'lineprops',{'Color', p(tr).Color}, 'transparent', 1);
+    if numel(stimValues)==1
+        shadedErrorBar(sig.t,sigMean,sigSEM,...
+            'lineprops',{'Color', p(1).Color}, 'transparent', 1);
+    else
+        for tr=1:numel(stimValues)
+            shadedErrorBar(sig.t,sigMean(:,tr),sigSEM(:,tr),...
+                'lineprops',{'Color', p(tr).Color}, 'transparent', 1);
+        end
     end
     clear p
 end
