@@ -16,12 +16,12 @@ if nargin == 3
     plotShadedSEM = false;
 end
 
-sigMean = squeeze(mean(sig.trials_dF_F(roiNum,:,:,:),3));
+sigMean = squeeze(nanmean(sig.trials_dF_F(roiNum,:,:,:),3));
 p = plot(sig.t,sigMean);
 
 if plotShadedSEM
     Ntrials = size(sig.trials,3);    
-    sigSEM  = squeeze(std(sig.trials_dF_F(roiNum,:,:,:),0,3)./sqrt(Ntrials));
+    sigSEM  = squeeze(nanstd(sig.trials_dF_F(roiNum,:,:,:),0,3)./sqrt(Ntrials));
     for tr=1:numel(stimValues)
         shadedErrorBar(sig.t,sigMean(:,tr),sigSEM(:,tr),...
             'lineprops',{'Color', p(tr).Color}, 'transparent', 1);

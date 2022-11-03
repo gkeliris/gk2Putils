@@ -1,15 +1,19 @@
-function stimTimes = gk_getStimFrameTimes(stimTimes)
-% USAGE: stimTimes = gk_getStimFrameTimes(stimTimes)
+function stimTimes = gk_getStimFrameTimes(stimTimes, frame_t)
+% USAGE: stimTimes = gk_getStimFrameTimes(stimTimes, [frame_t])
 %
 % Function that converts the stim onsets (in sec) to 2P frames
 %
 % INPUT: stimTimes - the field Times of the structure returned by gk_getStimTimes
-%
+%        frame_t   - the matrix of frame times returned by gk_getTimesStamps2P
 % OUTPUT: stimTimes - the updated structure including the frame times
 %
 % Author: Georgios A. Keliris
 % v1.0 - 1 Oct 2022 
 
+
+if nargin==2
+    stimTimes.frame_t=frame_t;
+end
 for z = 1:size(stimTimes.frame_t,1)
     t = stimTimes.frame_t(z,:);
     for o=1:numel(stimTimes.onsets)

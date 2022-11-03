@@ -10,13 +10,14 @@ t_dur=stim.Times.median_frame_duration(z);
 % Calculate the total trial duration
 trial_dur=t_before_frames + t_dur + t_after_frames;
 
+Ntrials=numel(stim.IDs);
 % Calculate indices to extract trials
-ind_from = stim.Times.frame_onsets(z,:)-t_before_frames;
-ind_to = stim.Times.frame_onsets(z,:) + t_dur + t_after_frames -1;
+ind_from = stim.Times.frame_onsets(z,1:Ntrials)-t_before_frames;
+ind_to = stim.Times.frame_onsets(z,1:Ntrials) + t_dur + t_after_frames -1;
 
-% 100 trials per angle
-ind_from = reshape(ind_from,[100,4]);
-ind_to = reshape(ind_to, 100, 4);
+% Ntrials/4 trials per angle
+ind_from = reshape(ind_from, Ntrials/4, 4);
+ind_to = reshape(ind_to, Ntrials/4, 4);
 
 nNeurons = size(sigMat,1);
 % iterate for each stimulus type and collect trials
@@ -27,7 +28,7 @@ for angle=1:4
     sig(angle).stim_dur = median(stim.Times.offsets-stim.Times.onsets);
     for typ = 1:numel(stim.Values)
         % get the trials with same stimulus type
-        ind=find(stim.IDs(100*(angle-1)+1:100*angle)==typ);
+        ind=find(stim.IDs(Ntrials/4*(angle-1)+1:Ntrials/4*angle)==typ);
         fromTo = [];
         for tr=1:numel(ind)
             fromTo = [fromTo ...

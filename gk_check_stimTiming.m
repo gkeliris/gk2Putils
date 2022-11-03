@@ -9,10 +9,10 @@ function stimTimes = gk_check_stimTiming(stimTimes, stimA)
 % Author: Georgios A. Keliris
 % v.0.1 17 October 2022
 
-h = figure;
-plot(stimTimes.frame_t(1,:),stimA);
-hold on;
-plot(stimTimes.t,stimTimes.stim_continuous*1000);
+h = figure; hold on;
+plot(stimTimes.t,stimTimes.stim_continuous*max(stimA.v));
+plot(stimA.t,stimA.v,'k.-','LineWidth',1); xlim([stimA.t(1) stimA.t(end)]);
+title(['dt = ', num2str(median(diff(stimA.t)))]);
 pause(0.1)
 
 answer = input("Does the timing needs correction y/n [n]? ","s");
