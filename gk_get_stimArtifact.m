@@ -16,12 +16,20 @@ fprintf('Beginning import of tall TIFF stacks.\n');
 nameParts = split(tiffSegments(1).name, '_');
 
 % loop over all TIFFs
-stimA.v=[]; stimA.t=[]; datOut=[];
+stimA.v=[]; stimA.t=[];
 for i=[whichSegments] %1:length(tiffSegments)
     fprintf("\tProcessing TIFF segment %i of %i...\n", i, length(tiffSegments));
     
-    obj=scanimage.util.ScanImageTiffReader(fullfile(tiffSegments(i).folder, tiffSegments(i).name));
-    dat=data(obj);
+    try 
+        obj=scanimage.util.ScanImageTiffReader(fullfile(tiffSegments(i).folder, tiffSegments(i).name));
+        dat=data(obj);
+    catch
+        info=imfinfo(fullfile(tiffSegments(i).folder, tiffSegments(i).name));
+        dat=zeros(info(1).Height,info(1).Width,numel(info));
+        for fi=1:numel(info)
+            dat(:,:,fi)=imread(fullfile(tiffSegments(i).folder, tiffSegments(i).name), fi);
+        end
+    end
     [ts, zL] = gk_getTimeStamps(fullfile(tiffSegments(i).folder, tiffSegments(i).name));
     nCh=numel(ts)/numel(unique(ts));
     nZ=numel(zL{1});

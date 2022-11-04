@@ -24,8 +24,11 @@ if strcmp(answer,'y')
     stimTimes = correct(stimTimes, factor)
 end
 
-close(h)
-
+try
+    close(h)
+catch
+   % do nothing
+end
 return
 
 %%%% helper 
