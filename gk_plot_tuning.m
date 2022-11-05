@@ -31,4 +31,9 @@ xlabel(xlabelStr);
 ylabel('\DeltaF/F');
 title(['Num: ' num2str(roiNum)]);
 
+[thetahat kappa] = circ_vmpar(deg2rad(stimValues)*2,sigMeanON-min(sigMeanON));
+[p alpha]=circ_vmpdf([],thetahat,kappa);
+hold on;
+plot(rad2deg(alpha)/2,p*sum(sigMeanON-min(sigMeanON))+min(sigMeanON),'r','LineWidth',1.5);
+
 return
