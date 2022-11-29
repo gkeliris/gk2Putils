@@ -38,10 +38,10 @@ for i=1:length(tiffSegments)
         fullfile(tiffSegments(i).folder, tiffSegments(i).name));
     ts = unique(ts);
     zLevels=numel(z{1});
-    
-    frame_t = [frame_t reshape(ts, [zLevels numel(ts)/zLevels])];
+
+    frame_t = [frame_t; ts];
 
     fprintf("\t\tcompleted at %.2f s.\n", toc(tStart));
 end
-
+frame_t = reshape(frame_t, [zLevels numel(frame_t)/zLevels]);
 fprintf("Full completed in %.2f s.\n", toc(tStart));

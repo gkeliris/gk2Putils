@@ -76,6 +76,14 @@ stimTimes.offsets = t(diff(s)==-1);
 stimTimes.t=t;
 stimTimes.stim_continuous=s;
 
+h1=figure; hold on; plot(h5data.t,h5data.AI4); xlabel('time [s]');
+plot(t,s*150+thr,'m','LineWidth',1.5);
+ylim([thr-100 thr+180])
+pause(0.001)
+answer = input("Check and press a key to continue ","s");
+close(h1);
+return
+
 %%%% helper function
 function [s, delta]=clean(s)
 
