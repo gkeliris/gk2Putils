@@ -90,7 +90,7 @@ function [s, delta]=clean(s)
 onoff=diff(s);
 edg=find(abs(onoff));
 delta=diff(edg);
-for n=10:-1:1
+for n=15:-1:1
     dn=find(delta==n);
     for i=1:n
         s(edg(dn)+n)=s(edg(dn));

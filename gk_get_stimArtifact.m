@@ -9,6 +9,9 @@ if nargin<1
 end
 [~, fname]=fileparts(firstTiff);
 tiffSegments = dir(fullfile(fpath, [fname(1:end-4) '*.tif']));
+if isstr(whichSegments)
+    whichSegments=1:length(tiffSegments);
+end
 
 tStart = tic;
 fprintf('Beginning import of tall TIFF stacks.\n');
