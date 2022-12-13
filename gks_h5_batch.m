@@ -1,4 +1,4 @@
-if isfile(fullfile('D:\1.2 MeCP2cohort1_11weeks_processed','exp_description.mat'))
+ if isfile(fullfile('D:\1.2 MeCP2cohort1_11weeks_processed','exp_description.mat'))
     load(fullfile('D:\1.2 MeCP2cohort1_11weeks_processed','exp_description'));
     fprintf('Loaded exp_description from disk\n');
     diary(fullfile('D:\1.2 MeCP2cohort1_11weeks_processed',[datestr(now,'yyyy-mm-dd_HHMMSS'),'_log.txt']))

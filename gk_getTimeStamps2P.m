@@ -43,5 +43,11 @@ for i=1:length(tiffSegments)
 
     fprintf("\t\tcompleted at %.2f s.\n", toc(tStart));
 end
-frame_t = reshape(frame_t, [zLevels numel(frame_t)/zLevels]);
+if rem(numel(frame_t),zLevels)
+    frame_t=reshape(frame_t(1:end-rem(numel(frame_t),zLevels)),...
+        [zLevels (numel(frame_t)-rem(numel(frame_t),zLevels))/zLevels]);
+    fprintf('Warning: a not complete image frame at the end was removed\n');
+else
+    frame_t = reshape(frame_t, [zLevels numel(frame_t)/zLevels]);
+end
 fprintf("Full completed in %.2f s.\n", toc(tStart));
