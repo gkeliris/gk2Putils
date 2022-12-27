@@ -1,5 +1,5 @@
-function gk_plot_tuning(sig, roiNum, stimValues, xlabelStr)
-% USAGE: gk_plot_tuning(sig, roiNum, stimValues, [xlabelStr])
+function [sigMeanON, sigSemON] = gk_get_tuning(sig, roiNum, stimValues, xlabelStr)
+% USAGE: gk_get_tuning(sig, roiNum, stimValues, [xlabelStr])
 %
 % Function that plots the tuning function of roi/neuron
 %

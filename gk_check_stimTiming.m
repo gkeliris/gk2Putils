@@ -20,8 +20,8 @@ if isempty(answer)
     answer='n';
 end
 if strcmp(answer,'y')
-    factor = input("Enter the correction factor: ")
-    stimTimes = correct(stimTimes, factor)
+    factor = input("Enter the correction factor: ");
+    stimTimes = correct(stimTimes, factor);
 end
 
 try
