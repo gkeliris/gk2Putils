@@ -74,7 +74,7 @@ stimTimes.stim_continuous=s;
 %%%% helper function
 function [s, delta]=clean(s)
 
-onoff=diff(s);
+onoff=diff(s(:));
 edg=find(abs(onoff));
 delta=diff(edg);
 onsets = [edg(1); edg(find(delta>1000)+1)]+1;

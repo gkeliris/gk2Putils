@@ -1,11 +1,15 @@
 function stimA = gk_get_stimArtifact(fpath, firstTiff, whichSegments)
 % USAGE: stimA = gk_get_stimArtifact(fpath, firstTiff, whichSegments)
 %
-if nargin<3
-    whichSegments=1;
-end
+
 if nargin<1
     [firstTiff, fpath] = uigetfile('*.tif','Select the first tiff segment');
+end
+if nargin<2
+    firstTiff=ls(fullfile(fpath,'*00001.tif'));
+end
+if nargin<3
+    whichSegments='all';
 end
 [~, fname]=fileparts(firstTiff);
 tiffSegments = dir(fullfile(fpath, [fname(1:end-4) '*.tif']));

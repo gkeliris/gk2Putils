@@ -26,8 +26,8 @@ sigSemOFF = squeeze(std(sig.trials_OFFresp(roiNum,:,:),0,2)./sqrt(Ntrials));
 errorbar(stimValues,sigMeanON,sigSemON,'ko-','MarkerFaceColor',[0 0 0]);
 yline([0],'--');
 xlabel(xlabelStr);
-xlim padded
-ylim padded
+%xlim padded
+%ylim padded
 ylabel('\DeltaF/F');
 title(['Num: ' num2str(roiNum)]);
 

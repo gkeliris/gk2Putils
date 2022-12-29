@@ -3,6 +3,10 @@ function frame_t = gk_getTimeStamps2P(fpath, firstTiff)
 if nargin<1
     [firstTiff, fpath] = uigetfile('*.tif','Select the first tiff segment');
 end
+if nargin<2
+    firstTiff=ls(fullfile(fpath,'*00001.tif'));
+end
+      
 [~, fname]=fileparts(firstTiff);
 tiffSegments = dir(fullfile(fpath, [fname(1:end-4) '*.tif']));
 

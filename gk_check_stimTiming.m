@@ -8,7 +8,8 @@ function stimTimes = gk_check_stimTiming(stimTimes, stimA)
 % 
 % Author: Georgios A. Keliris
 % v.0.1 17 October 2022
-
+answer='y';
+while strcmp(answer,'y')
 h = figure; hold on;
 plot(stimTimes.t,stimTimes.stim_continuous*max(stimA.v));
 plot(stimA.t,stimA.v,'k.-','LineWidth',1); xlim([stimA.t(1) stimA.t(end)]);
@@ -29,8 +30,9 @@ try
 catch
    % do nothing
 end
-return
 
+end
+return
 %%%% helper 
 function stimTimes = correct(stimTimes, factor)
 stimTimes.t = stimTimes.t + factor;
