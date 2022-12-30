@@ -13,7 +13,7 @@ Ntrials = size(sig.trials_ONresp,2);
 sigMeanON = squeeze(mean(sig.trials_ONresp(roiNum,:,:),2));
 sigSemON = squeeze(std(sig.trials_ONresp(roiNum,:,:),0,2)./sqrt(Ntrials));
 
-sigMeanOFF= squeeze(mean(sig.trials_OFFresp(roiNum,:,:),2));
-sigSemOFF = squeeze(std(sig.trials_OFFresp(roiNum,:,:),0,2)./sqrt(Ntrials));
+%sigMeanOFF= squeeze(mean(sig.trials_OFFresp(roiNum,:,:),2));
+%sigSemOFF = squeeze(std(sig.trials_OFFresp(roiNum,:,:),0,2)./sqrt(Ntrials));
 
 return
