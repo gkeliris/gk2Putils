@@ -37,6 +37,7 @@ else
 end
 t = h5data.t(h5data.t>=tstart & h5data.t<=tend);
 photodiode= h5data.AI4(h5data.t>=tstart & h5data.t<=tend);
+
 thr = input('Enter threshold: ');
 close(h1);
 
@@ -70,6 +71,10 @@ stimTimes.offsets = t(diff(s)==-1);
 
 stimTimes.t=t;
 stimTimes.stim_continuous=s;
+stimTimes.photodiode=photodiode;
+stimTimes.fidget=h5data.AI7(h5data.t>=tstart & h5data.t<=tend);
+stimTimes.encoder1=h5data.AI2(h5data.t>=tstart & h5data.t<=tend);
+stimTimes.encoder2=h5data.AI6(h5data.t>=tstart & h5data.t<=tend);
 
 %%%% helper function
 function [s, delta]=clean(s)
