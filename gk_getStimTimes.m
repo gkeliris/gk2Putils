@@ -24,19 +24,26 @@ function stimTimes = gk_getStimTimes(h5data)
 %
 % Author: Georgios A. Keliris
 % v.1.0 - 19 Sep 2022  
-
-h1=figure; hold on; plot(h5data.t,h5data.AI4); xlabel('time [s]');
+try
+    h1=figure; hold on; plot(h5data.t,h5data.AI4); xlabel('time [s]');
+catch
+    h1=figure; hold on; plot(h5data.t,h5data.Visual); xlabel('time [s]');
+end
 pause(0.001);
 [tstartend] = input("If necessary enter start/end time in seconds [else press enter]. [tstart tend] = ");
 if isempty(tstartend)
     tstart=h5data.t(1);
     tend=h5data.t(end);
 else
-    tstart=tstartend(1);
+    tstart=tstartend(1); 
     tend=tstartend(2);
 end
 t = h5data.t(h5data.t>=tstart & h5data.t<=tend);
-photodiode= h5data.AI4(h5data.t>=tstart & h5data.t<=tend);
+try
+    photodiode= h5data.AI4(h5data.t>=tstart & h5data.t<=tend);
+catch
+    photodiode= h5data.Visual(h5data.t>=tstart & h5data.t<=tend);
+end
 thr = input('Enter approximate threshold: ');
 close(h1);
 
@@ -46,7 +53,11 @@ pause(0.001);
 thr = input('Enter threshold: ');
 close(h2);
 stimON=zeros(size(t));
-stimON(photodiode>thr)=1;
+if min(photodiode)<-1000
+stimON(photodiode<thr)=1;
+else
+ stimON(photodiode>thr)=1;
+end
 
 s=stimON;
 onoff=diff(s);
@@ -75,8 +86,11 @@ stimTimes.offsets = t(diff(s)==-1);
 
 stimTimes.t=t;
 stimTimes.stim_continuous=s;
-
-h1=figure; hold on; plot(h5data.t,h5data.AI4); xlabel('time [s]');
+try
+    h1=figure; hold on; plot(h5data.t,h5data.AI4); xlabel('time [s]');
+catch
+    h1=figure; hold on; plot(h5data.t,h5data.Visual); xlabel('time [s]');
+end
 plot(t,s*150+thr,'m','LineWidth',1.5);
 ylim([thr-100 thr+180])
 pause(0.001)

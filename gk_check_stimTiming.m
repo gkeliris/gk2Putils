@@ -1,5 +1,5 @@
-function stimTimes = gk_check_stimTiming(stimTimes, stimA)
-% USAGE: stimTimes = gk_check_stimTiming(stimTimes, stimA)
+function stimTimes = gk_check_stimTiming(stimTimes, stimA, h5)
+% USAGE: stimTimes = gk_check_stimTiming(stimTimes, stimA, [h5])
 %
 % INPUT: stimTimes - the stim.Times field
 %        stimA - the stimA returned by gk_get_stimArtifact
@@ -8,11 +8,18 @@ function stimTimes = gk_check_stimTiming(stimTimes, stimA)
 % 
 % Author: Georgios A. Keliris
 % v.0.1 17 October 2022
+
+
 answer='y';
 while strcmp(answer,'y')
+
 h = figure; hold on;
+if nargin==3
+    plot(h5.t,h5.AI4,'m');
+end
 plot(stimTimes.t,stimTimes.stim_continuous*max(stimA.v));
 plot(stimA.t,stimA.v,'k.-','LineWidth',1); xlim([stimA.t(1) stimA.t(end)]);
+dt=median(diff(stimA.t));
 title(['dt = ', num2str(median(diff(stimA.t)))]);
 pause(0.1)
 
@@ -21,8 +28,11 @@ if isempty(answer)
     answer='n';
 end
 if strcmp(answer,'y')
-    factor = input("Enter the correction factor: ");
-    stimTimes = correct(stimTimes, factor);
+    factor = input("Enter the correction factor in dt units: ");
+    stimTimes = correct(stimTimes, factor*dt);
+    if nargin==3
+        h5.t=h5.t+factor*dt;
+    end
 end
 
 try
