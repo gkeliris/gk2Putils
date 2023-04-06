@@ -1,6 +1,32 @@
-function gk_DES_func(func,coh,wk,ms,ex,force)
+function gk_DES_func(func,coh,wk,ms,ex,force,whichSegments)
+% USAGE: gk_DES_func(func,coh,wk,ms,ex,[force],[whichSegments])
+%
+% INPUT:
+%   func: function to perform, can be one of the following:
+%         'done_info' : information on what has been not done yet
+%         'cdProc'    : goes to the processed data folder and waits
+%                       (keyboard - you can use dbcont to continue)
+%         'cdRaw'     : goes to the raw data folder and waits
+%                       (keyboard - you can use dbcont to continue)
+%         'h5'        : processes the h5 to get the stimulus times
+%         'frT'       : gets the frame times, h5 has to be already done
+%         'stimA'     : extracts the stimA
+%         'sync'      : checks and adjusts the timing 'frT has to be done
+%
+%   coh : the mouse cohort - 'coh1' or 'coh2' or [] for all
+%   wk  : the timepoint - 'w11' or 'w22' or [] for all
+%   ms  : the mouse id e.g. M19
+%   ex  : the experiment id e.g. 'contrast', 'OR', 'DR', 'RF', etc.
+%   force: forces the function to run even if it was done before
+%   whichSegments: for stimA one can define which segments to get
+%
+% Author: Georgios Keliris, March 2023
+
 if ~exist('force')
     force=false;
+end
+if ~exist('whichSegments')
+    whichSegments='all';
 end
 load('D:\all_exp_description.mat');
 
@@ -59,11 +85,18 @@ for ci=1:numel(coh)
                                 DES = frT_func(DES,coh,ci,wk,wi,ms,mi,ex,ei);
                                 save('D:\all_exp_description.mat','DES')
                             end
+                        case 'stimA'
+                            if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone==0 || force
+                                DES = stimA_func(DES,coh,ci,wk,wi,ms,mi,ex,ei,whichSegments);
+                                save('D:\all_exp_description.mat','DES')
+                            end
+                        case 'stim'
+                            stim_func(DES,coh,ci,wk,wi,ms,mi,ex,ei)
                         case 'sync'
                             if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).syncdone==0 || force
                             if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==1 && ...
                                DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone==1
-                                DES = sync_func(DES,coh,ci,wk,wi,ms,mi,ex,ei);
+                                DES = sync_func(DES,coh,ci,wk,wi,ms,mi,ex,ei,force);
                                 save('D:\all_exp_description.mat','DES')
                             else
                                 fprintf('%s, %s, %s, %s: ERROR: Both h5 and stimA need to be done\n',coh{ci},wk{wi},ms{mi},ex{ei})
@@ -166,6 +199,19 @@ function DES = frT_func(DES,coh,ci,wk,wi,ms,mi,ex,ei)
 
 fprintf("Processing: %s, %s, %s, %s \n",coh{ci},wk{wi},ms{mi},ex{ei});
 try
+%%%%%%%%%%%%%%%%%%%s%temporary added for fixing the filename errors:
+    if ~isfile([DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath '\' DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff])
+
+%       tempindex=strfind(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff,'_');
+%       DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff=insertAfter(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff,tempindex(2),'_');
+
+%         tempindex=strfind(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff,'1_');
+%         DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff(tempindex)='2';
+%for w11_M145_SF_20220103: 
+       tempindex=strfind(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff,'__');
+       DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff(tempindex)='';
+    end 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     frame_t = gk_getTimeStamps2P(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath,...
         DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff);
     save(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'frame_t'),'frame_t');
@@ -189,8 +235,37 @@ catch
     return
 end
 return
+%---------------------------------------------------------------------------
+function DES = stimA_func(DES,coh,ci,wk,wi,ms,mi,ex,ei,whichSegments)
+
+fprintf("Processing: %s, %s, %s, %s \n",coh{ci},wk{wi},ms{mi},ex{ei});
+try
+    stimA=gk_get_stimArtifact(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath,...
+        DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff,whichSegments);
+    save(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stimA'),'stimA');
+    DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone=1; % means it was done
+catch
+    fprintf('Warning: something went wrong, moving to the next one\n')
+    DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone=-1; % means there was an error
+    return
+end
+return
 %-----------------------------------------------------------------------------------
-function DES = sync_func(DES,coh,ci,wk,wi,ms,mi,ex,ei);
+function stim_func(DES,coh,ci,wk,wi,ms,mi,ex,ei)
+
+fprintf("Processing: %s, %s, %s, %s \n",coh{ci},wk{wi},ms{mi},ex{ei});
+
+try
+    load(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stim_t.mat'))
+    load(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'frame_t.mat'))
+    stim.Times = gk_getStimFrameTimes(stim_t,frame_t);
+    save(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stim'),'stim');
+catch
+    fprintf('Warning: something went wrong, moving to the next one\n')
+    return
+end
+%-----------------------------------------------------------------------------------
+function DES = sync_func(DES,coh,ci,wk,wi,ms,mi,ex,ei,force)
 
 
 d=dir(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath,'*.h5'));
@@ -198,8 +273,24 @@ h5 = gk_readH5(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath,d.name)
 
 load(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stim.mat'));
 load(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stimA.mat'));
-
-stim.Times = gk_check_stimTiming(stim.Times, stimA, h5);
+mydTpath=fileparts(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath);
+if force==0
+try
+    load(fullfile(mydTpath,'mydT.mat'));
+    expIndex = find(strcmp(mydT.folder,DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath));
+    if isempty(expIndex)
+        fprintf('%s\n',DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath)
+        mydT.folder
+        expIndex = input("Please enter expIndex manually: expIndex = ");
+    end
+    dT=mydT.dT(expIndex);
+    stim.Times = gk_check_stimTiming(stim.Times, stimA, h5, dT);
+catch
+    stim.Times = gk_check_stimTiming(stim.Times, stimA, h5);
+end
+elseif force
+    stim.Times = gk_check_stimTiming(stim.Times, stimA, h5);
+end
 
 answer = input("Save stim.mat y/n [n]? ","s");
 if isempty(answer)

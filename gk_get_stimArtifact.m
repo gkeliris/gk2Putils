@@ -39,9 +39,13 @@ for i=[whichSegments] %1:length(tiffSegments)
     end
     [ts, zL] = gk_getTimeStamps(fullfile(tiffSegments(i).folder, tiffSegments(i).name));
     nCh=numel(ts)/numel(unique(ts));
-    nZ=numel(zL{1});
-
-    stimA.v=[stimA.v; squeeze(mean(dat(:,:,nCh:nCh*nZ:end),[1 2]))];
+    nZ=numel(zL);
+    dat=reshape(dat,size(dat,1)*size(dat,2),size(dat,3));
+    MI=mean(dat(:,1:nCh*nZ:end),2);
+    QQ=quantile(MI,0.05);
+    lowVal=find(MI<QQ);
+   
+    stimA.v=[stimA.v; mean(dat(lowVal,nCh:nCh*nZ:end))'];
     stimA.t=[stimA.t; ts(nCh:nCh*nZ:end)];
 end
 

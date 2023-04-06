@@ -23,12 +23,15 @@ function stimTimes = gk_getStimTimes(h5data)
 % Example: stim = gk_getStimTimes(gk_readH5('OR_M19_0001.h5'));
 %
 % Author: Georgios A. Keliris
-% v.1.0 - 19 Sep 2022  
+% v.1.0 - 19 Sep 2022
+
+
 try
-    h1=figure; hold on; plot(h5data.t,h5data.AI4); xlabel('time [s]');
+    PD = h5data.AI4;
 catch
-    h1=figure; hold on; plot(h5data.t,h5data.Visual); xlabel('time [s]');
+    PD = h5data.Visual;
 end
+h1=figure; hold on; plot(h5data.t,PD); xlabel('time [s]');
 pause(0.001);
 [tstartend] = input("If necessary enter start/end time in seconds [else press enter]. [tstart tend] = ");
 if isempty(tstartend)
@@ -39,11 +42,8 @@ else
     tend=tstartend(2);
 end
 t = h5data.t(h5data.t>=tstart & h5data.t<=tend);
-try
-    photodiode= h5data.AI4(h5data.t>=tstart & h5data.t<=tend);
-catch
-    photodiode= h5data.Visual(h5data.t>=tstart & h5data.t<=tend);
-end
+photodiode= PD(h5data.t>=tstart & h5data.t<=tend);
+
 thr = input('Enter approximate threshold: ');
 close(h1);
 
@@ -86,11 +86,9 @@ stimTimes.offsets = t(diff(s)==-1);
 
 stimTimes.t=t;
 stimTimes.stim_continuous=s;
-try
-    h1=figure; hold on; plot(h5data.t,h5data.AI4); xlabel('time [s]');
-catch
-    h1=figure; hold on; plot(h5data.t,h5data.Visual); xlabel('time [s]');
-end
+
+h1=figure; hold on; plot(h5data.t,PD); xlabel('time [s]');
+
 plot(t,s*150+thr,'m','LineWidth',1.5);
 ylim([thr-100 thr+180])
 pause(0.001)

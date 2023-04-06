@@ -41,8 +41,7 @@ for i=1:length(tiffSegments)
     [ts, z] = gk_getTimeStamps(...
         fullfile(tiffSegments(i).folder, tiffSegments(i).name));
     ts = unique(ts);
-    zLevels=numel(z{1});
-
+    zLevels=numel(z);
     frame_t = [frame_t; ts];
 
     fprintf("\t\tcompleted at %.2f s.\n", toc(tStart));
