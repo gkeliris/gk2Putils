@@ -14,7 +14,7 @@ end
 [~, fname]=fileparts(firstTiff);
 tiffSegments = dir(fullfile(fpath, [fname(1:end-4) '*.tif']));
 if isstr(whichSegments)
-    whichSegments=1:length(tiffSegments);
+  whichSegments=1:length(tiffSegments);  
 end
 
 tStart = tic;
@@ -25,8 +25,8 @@ nameParts = split(tiffSegments(1).name, '_');
 % loop over all TIFFs
 stimA.v=[]; stimA.t=[];
 for i=[whichSegments] %1:length(tiffSegments)
-    fprintf("\tProcessing TIFF segment %i of %i...\n", i, length(tiffSegments));
-    
+   fprintf("\tProcessing TIFF segment %i of %i...\n", i, length(tiffSegments));
+ %     fprintf("\tProcessing TIFF segment %i of %i...\n", i, length(whichSegments));
     try 
         obj=scanimage.util.ScanImageTiffReader(fullfile(tiffSegments(i).folder, tiffSegments(i).name));
         dat=data(obj);

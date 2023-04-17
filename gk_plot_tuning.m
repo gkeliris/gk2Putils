@@ -29,7 +29,7 @@ xlabel(xlabelStr);
 %xlim padded
 %ylim padded
 ylabel('\DeltaF/F');
-title(['Num: ' num2str(roiNum)]);
+title(['ROI#: ' num2str(roiNum)]);
 
 % binangles=round(10000*(sigMeanON-min(sigMeanON))./sum(sigMeanON-min(sigMeanON)));
 % samples=[];

@@ -39,7 +39,7 @@ xline(0,':','stim ON');
 xline(sig.stim_dur,':','stim OFF');
 xlabel('time [s]')
 ylabel('\DeltaF/F')
-legend(num2str(stimValues),'Location','northwest');
-title(['Num: ' num2str(roiNum)]);
+legend(num2str(stimValues),'Location','northeast');
+title(['ROI#: ' num2str(roiNum)]);
 
 return

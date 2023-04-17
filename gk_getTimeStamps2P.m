@@ -18,6 +18,8 @@ nameParts = split(tiffSegments(1).name, '_');
 
 % loop over all TIFFs
 frame_t=[]; 
+% 
+
 for i=1:length(tiffSegments)
     fprintf("\tProcessing TIFF segment %i of %i...\n", i, length(tiffSegments));
     
@@ -38,6 +40,10 @@ for i=1:length(tiffSegments)
 % % %     ts = header.frameTimestamps_sec(1:nCh:end);
 % % %     zLevels = header.SI.hFastZ.numFramesPerVolume;
     % Method 3 (GAK fast script)
+   
+
+
+
     [ts, z] = gk_getTimeStamps(...
         fullfile(tiffSegments(i).folder, tiffSegments(i).name));
     ts = unique(ts);

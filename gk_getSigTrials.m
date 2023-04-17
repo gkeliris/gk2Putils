@@ -18,7 +18,8 @@ function sig = gk_getSigTrials(sigMat, stim, t_before_sec, t_after_sec)
 % Author: Georgios A. Keliris
 % v1.0 - 16 Oct 2022 
 
-
+sig.expType=stim.expType;
+sig.stimValues=stim.Values;
 z=1; %for multiplane ROIs that could have different timing, we use the 1st
 
 % Calculate the number of frames before, during, and after stimulus onset

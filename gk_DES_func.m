@@ -30,12 +30,12 @@ if ~exist('whichSegments')
 end
 load('D:\all_exp_description.mat');
 
-if ~exist('coh') | isempty(coh)
+if ~exist('coh') || isempty(coh)
     coh=fieldnames(DES);
 else
     coh={coh};
 end
-if ~exist('wk') | isempty(wk)
+if ~exist('wk') || isempty(wk)
     wk=fieldnames(DES.coh1);
 else
     wk={wk};
@@ -46,7 +46,7 @@ else
     msset=0;
     ms={ms};
 end
-if ~exist('ex') | isempty(ex)
+if ~exist('ex') || isempty(ex)
     exset=1;
 else
     exset=0;
@@ -102,14 +102,16 @@ for ci=1:numel(coh)
                                 fprintf('%s, %s, %s, %s: ERROR: Both h5 and stimA need to be done\n',coh{ci},wk{wi},ms{mi},ex{ei})
                             end
                             end
+                        case 'addStimulus'
+                            addStimulus_func(DES,coh,ci,wk,wi,ms,mi,ex,ei,force)
                         otherwise
                             disp('Unknown method.')
                     end
-                catch
+                catch ME
                     %% 
-                    keyboard
-                    
+                    display(getReport(ME))
                     fprintf('%s, %s, %s, %s: CRASH\n',coh{ci},wk{wi},ms{mi},ex{ei})
+                    keyboard
                 end
                 end
             end
@@ -124,31 +126,31 @@ return
 %---------------------------------------------------------------------------
 function info_func(DES,coh,ci,wk,wi,ms,mi,ex,ei)
 
-if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==0;
+if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==0
     fprintf('%s, %s, %s, %s: h5 not done\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
-if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==2;
+if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==2
     fprintf('%s, %s, %s, %s: h5 was skipped\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
-if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==3;
+if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==3
     fprintf('%s, %s, %s, %s: h5 not found\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
-if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==4;
+if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==4
     fprintf('%s, %s, %s, %s: h5 not readable\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
-if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).frTdone==0;
+if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).frTdone==0
     fprintf('%s, %s, %s, %s: frT not done\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
-if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).frTdone==-1;
+if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).frTdone==-1
     fprintf('%s, %s, %s, %s: frT error\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
-if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone==0;
+if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone==0
     fprintf('%s, %s, %s, %s: stimA not done\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
-if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone==-1;
+if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone==-1
     fprintf('%s, %s, %s, %s: stimA error\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
-if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).syncdone==0;
+if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).syncdone==0
     fprintf('%s, %s, %s, %s: sync not done\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
 return
@@ -205,11 +207,11 @@ try
 %       tempindex=strfind(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff,'_');
 %       DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff=insertAfter(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff,tempindex(2),'_');
 
-%         tempindex=strfind(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff,'1_');
-%         DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff(tempindex)='2';
+%          tempindex=strfind(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff,'1_');
+%          DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff(tempindex)='2';
 %for w11_M145_SF_20220103: 
-       tempindex=strfind(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff,'__');
-       DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff(tempindex)='';
+%        tempindex=strfind(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff,'__');
+%        DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff(tempindex)='';
     end 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     frame_t = gk_getTimeStamps2P(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath,...
@@ -299,5 +301,59 @@ end
 if strcmp(answer,'y')
     DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).syncdone=1;
     save(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stim.mat'),'stim');
+end
+return
+%-----------------------------------------------------------------------------------
+function addStimulus_func(DES,coh,ci,wk,wi,ms,mi,ex,ei,force)
+
+if isfile(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stim.mat'))
+    load(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stim.mat'));
+    if ~isfield(stim,'Values') || force
+        if contains(upper(ex{ei}),'CONTRAST')
+            load('D:\2 visual stimulus files\contrast2.mat')
+            stim.expType='contrast';
+            stim.IDs=[Stims; Stims;];      
+        elseif contains(upper(ex{ei}),'DR')
+            load('D:\2 visual stimulus files\direction.mat')
+            stim.expType='DR';
+            stim.IDs=Stims;
+        elseif contains(upper(ex{ei}),'OR')
+            load('D:\2 visual stimulus files\orientation.mat')
+            stim.expType='OR';
+            stim.IDs=Stims;
+        elseif contains(upper(ex{ei}),'RF')
+            load('D:\2 visual stimulus files\RF.mat')
+            stim.expType='RF';
+            [uS, ~, pos2] = unique(cellcenter,'rows');
+            stim.uniquePos=uS;
+            stim.IDs=CellIndex';
+            StimTyps=(1:60)';
+            stim.posIDs=pos2;
+        elseif contains(upper(ex{ei}),'SF')
+            load('D:\2 visual stimulus files\SF.mat')
+            stim.expType='SF';
+            stim.IDs=[Stims(1:100); Stims(1:100); Stims(1:100); Stims(1:100)];
+        elseif contains(upper(ex{ei}),'TF')
+            load('D:\2 visual stimulus files\TF.mat')
+            stim.expType='TF';
+            stim.IDs=[Stims(1:100); Stims(1:100); Stims(1:100); Stims(1:100)];
+        elseif contains(upper(ex{ei}),'OO')
+            stim.expType='OO';
+            StimTyps=[1 0]';
+            stim.IDs=[repmat([1 2],1,20)]';
+        else
+            % treat here potential future exp types
+        end
+        stim.Values=StimTyps;
+        Ntrials = numel(stim.Times.onsets);
+        Ntrials_equal = Ntrials - rem(Ntrials,numel(stim.Values));
+        if Ntrials>numel(stim.IDs)
+            stim.IDs=[stim.IDs; stim.IDs];
+        end
+        stim.IDs=stim.IDs(1:Ntrials_equal);
+        save(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stim.mat'),'stim');
+    end
+else
+    fprintf('%s, %s, %s, %s: stim.mat is not yet created\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
 return

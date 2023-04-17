@@ -16,7 +16,9 @@ if nargin==2
 end
 
 %consider as valid trials those that have data at least 2 sec after offset
-stimTimes.validTrials=find(stimTimes.offsets+2<stimTimes.frame_t(end,end));
+%stimTimes.validTrials=find(stimTimes.offsets+2<stimTimes.frame_t(end,end));
+%temporily modify to onset+5 s
+stimTimes.validTrials=find(stimTimes.onsets+5<stimTimes.frame_t(end,end));
 if numel(stimTimes.validTrials)<numel(stimTimes.onsets)
     fprintf('WARNING: 2P data seem to have less trials than photodiode\n')
     fprintf('NTrials 2P = %d, NTrials PD = %d\n, ', ...
