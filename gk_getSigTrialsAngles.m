@@ -1,6 +1,6 @@
 function sig = gk_getSigTrialsAngles(sigMat, stim, t_before_sec, t_after_sec, nAngles)
 
-
+sig.expType=stim.expType;
 z=1; %for multiplane ROIs that could have different timing, we use the 1st
 
 % Calculate the number of frames before, during, and after stimulus onset
@@ -24,8 +24,9 @@ nNeurons = size(sigMat,1);
 % this also calculates dF/F and responses during ON and OFF periods
 for angle=1:nAngles
     % Calculate trial t (stim onset = 0)
-    sig(angle).t=[-t_before_frames:(t_dur + t_after_frames -1)]./stim.Times.frame_fs(z);
-    sig(angle).stim_dur = median(stim.Times.offsets-stim.Times.onsets);
+    sig.grp(angle).stimValues=stim.Values;
+    sig.grp(angle).t=[-t_before_frames:(t_dur + t_after_frames -1)]./stim.Times.frame_fs(z);
+    sig.grp(angle).stim_dur = median(stim.Times.offsets-stim.Times.onsets);
     for typ = 1:numel(stim.Values)
         % get the trials with same stimulus type
         ind=find(stim.IDs(Ntrials/nAngles*(angle-1)+1:Ntrials/nAngles*angle)==typ);
@@ -41,10 +42,10 @@ for angle=1:nAngles
         trials_ONresp = mean(trials_dF_F(:,t_before_frames+3:t_before_frames+t_dur,:),2);
         trials_OFFresp = mean(trials_dF_F(:,t_before_frames+t_dur+3:t_before_frames+t_dur+t_after_frames-3,:),2);
         % save to sig structure that is returned by the function
-        sig(angle).trials(:,:,:,typ) = trials;
-        sig(angle).trials_dF_F(:,:,:,typ) = trials_dF_F;
-        sig(angle).trials_ONresp(:,:,typ) = squeeze(trials_ONresp);
-        sig(angle).trials_OFFresp(:,:,typ) = squeeze(trials_OFFresp);
+        sig.grp(angle).trials(:,:,:,typ) = trials;
+        sig.grp(angle).trials_dF_F(:,:,:,typ) = trials_dF_F;
+        sig.grp(angle).trials_ONresp(:,:,typ) = squeeze(trials_ONresp);
+        sig.grp(angle).trials_OFFresp(:,:,typ) = squeeze(trials_OFFresp);
 
     end
 end

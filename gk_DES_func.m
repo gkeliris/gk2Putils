@@ -345,7 +345,7 @@ if isfile(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stim.mat')
             % treat here potential future exp types
         end
         stim.Values=StimTyps;
-        Ntrials = numel(stim.Times.onsets);
+        Ntrials = size(stim.Times.frame_onsets,2);
         Ntrials_equal = Ntrials - rem(Ntrials,numel(stim.Values));
         if Ntrials>numel(stim.IDs)
             stim.IDs=[stim.IDs; stim.IDs];

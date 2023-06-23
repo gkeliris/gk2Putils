@@ -27,7 +27,7 @@ function stimTimes = gk_getStimTimes(h5data)
 
 
 try
-    PD = h5data.AI4;
+    PD = h5data.AI5;
 catch
     PD = h5data.Visual;
 end

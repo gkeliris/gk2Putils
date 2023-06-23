@@ -28,15 +28,15 @@ catch
         sweeps           =h5read(filename,'/sweep_0003/analogScans');
     end
 end     
-data.t           = ([1/data.fs:1/data.fs:data.duration]+1)'; %add 1 second
+data.t           = ([1/data.fs:1/data.fs:data.duration]+0)'; %add 0 seconds
 
 if numel(data.t) ~= length(sweeps)
-    data.t = ([1/data.fs:1/data.fs:length(sweeps)/data.fs]+1)';
+    data.t = ([1/data.fs:1/data.fs:length(sweeps)/data.fs]+0)';
     fprintf("WARNING: H5 duration and sweep points don't match!!\n")
     fprintf('Extracted the time using the sweep # of points.\n')
 end
 data.(data.chNames{1})=sweeps(:,1);
 for i=1:numel(data.chNames)
-    data.(data.chNames{i})=sweeps(:,i);
+    data.(strtrim(data.chNames{i}))=sweeps(:,i);
 end
 
