@@ -27,9 +27,9 @@ function stimTimes = gk_getStimTimes(h5data)
 
 
 try
-    PD = h5data.AI5;
-catch
     PD = h5data.Visual;
+catch
+     PD = h5data.AI5; 
 end
 h1=figure; hold on; plot(h5data.t,PD); xlabel('time [s]');
 pause(0.001);
