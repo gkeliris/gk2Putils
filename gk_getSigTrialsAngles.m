@@ -12,13 +12,24 @@ trial_dur=t_before_frames + t_dur + t_after_frames;
 
 Ntrials=numel(stim.IDs);
 % Calculate indices to extract trials
-ind_from = stim.Times.frame_onsets(z,1:Ntrials)-t_before_frames;
-ind_to = stim.Times.frame_onsets(z,1:Ntrials) + t_dur + t_after_frames -1;
+i_from = stim.Times.frame_onsets(z,1:Ntrials)-t_before_frames;
+i_to = stim.Times.frame_onsets(z,1:Ntrials) + t_dur + t_after_frames -1;
 
-% Ntrials/4 trials per angle
-ind_from = reshape(ind_from, Ntrials/nAngles, nAngles);
-ind_to = reshape(ind_to, Ntrials/nAngles, nAngles);
 
+% For new experiments separate according to Angles
+if isfield(stim,'Angles')
+    vAngles=unique(stim.Angles);
+    nAngles=numel(vAngles);
+    
+    for a=1:nAngles
+        ind_from(:,a)=i_from(stim.Angles==vAngles(a));
+        ind_to(:,a)=i_to(stim.Angles==vAngles(a));
+    end
+else
+    % Ntrials/4 trials per angle
+    ind_from = reshape(i_from, Ntrials/nAngles, nAngles);
+    ind_to = reshape(i_to, Ntrials/nAngles, nAngles);
+end
 nNeurons = size(sigMat,1);
 % iterate for each stimulus type and collect trials
 % this also calculates dF/F and responses during ON and OFF periods
@@ -29,7 +40,11 @@ for angle=1:nAngles
     sig.grp(angle).stim_dur = median(stim.Times.offsets-stim.Times.onsets);
     for typ = 1:numel(stim.Values)
         % get the trials with same stimulus type
-        ind=find(stim.IDs(Ntrials/nAngles*(angle-1)+1:Ntrials/nAngles*angle)==typ);
+        if isfield(stim,'Angles')
+            ind=find(stim.IDs(stim.Angles==vAngles(angle))==typ);
+        else
+            ind=find(stim.IDs(Ntrials/nAngles*(angle-1)+1:Ntrials/nAngles*angle)==typ);
+        end
         fromTo = [];
         for tr=1:numel(ind)
             fromTo = [fromTo ...
@@ -42,10 +57,14 @@ for angle=1:nAngles
         trials_ONresp = mean(trials_dF_F(:,t_before_frames+3:t_before_frames+t_dur,:),2);
         trials_OFFresp = mean(trials_dF_F(:,t_before_frames+t_dur+3:t_before_frames+t_dur+t_after_frames-3,:),2);
         % save to sig structure that is returned by the function
-        sig.grp(angle).trials(:,:,:,typ) = trials;
-        sig.grp(angle).trials_dF_F(:,:,:,typ) = trials_dF_F;
-        sig.grp(angle).trials_ONresp(:,:,typ) = squeeze(trials_ONresp);
-        sig.grp(angle).trials_OFFresp(:,:,typ) = squeeze(trials_OFFresp);
+%         sig.grp(angle).trials(:,:,:,typ) = trials;
+%         sig.grp(angle).trials_dF_F(:,:,:,typ) = trials_dF_F;
+%         sig.grp(angle).trials_ONresp(:,:,typ) = squeeze(trials_ONresp);
+%         sig.grp(angle).trials_OFFresp(:,:,typ) = squeeze(trials_OFFresp);
+        sig.grp(angle,typ).trials = trials;
+        sig.grp(angle,typ).trials_dF_F = trials_dF_F;
+        sig.grp(angle,typ).trials_ONresp = squeeze(trials_ONresp);
+        sig.grp(angle,typ).trials_OFFresp = squeeze(trials_OFFresp);
 
     end
 end

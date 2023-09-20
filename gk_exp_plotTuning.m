@@ -1,6 +1,6 @@
 function gk_exp_plotTuning(coh,wk,ms,ex,sigName,t_before,t_after,whichROI,pthr)
 
-exportPath='J:\PPT_log\';
+exportPath='/mnt/12TB_HDD_6/ThinkmateB_HDD6_Data/GKeliris/PPT_log';
 
 xpr = gk_exp_getSigTrials(coh,wk,ms,ex,sigName,t_before,t_after);
 xpr = gk_getTunedROIs(xpr,pthr);
@@ -51,11 +51,16 @@ for roi=ROIs
 
         for g=1:numel(xpr.grp)
             subplot(2,4,2*(g-1)+1);
-            gk_plot_trials(xpr.grp(g), roi, xpr.grp(g).stimValues, false)
+            gk_plot_trials(xpr, roi, g, xpr.stimValues, false)
+%             for stm=1:14
+%                 %trialInd = find(xpr.stimIDs==stm & xpr.stimAngles==g);
+%                 %select = gk_selectTrials(xpr, stm, g);
+%                 
+%             end
             title(['ROI#=', num2str(roi), ', angle=', angles{g}]);
             legend off
             subplot(2,4,2*g);
-            gk_plot_tuning(xpr.grp(g), roi, xpr.grp(g).stimValues, xlabl)
+            gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl)
             title(['ROI#=', num2str(roi), ', angle=', angles{g}]);
         end
        

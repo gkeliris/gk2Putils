@@ -28,7 +28,7 @@ end
 if ~exist('whichSegments')
     whichSegments='all';
 end
-load('D:\all_exp_description.mat');
+load('/mnt/Toshiba_16TB_1/all_exp_description.mat');
 
 if ~exist('coh') || isempty(coh)
     coh=fieldnames(DES);
@@ -76,28 +76,28 @@ for ci=1:numel(coh)
                             cd(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath);
                             keyboard;
                         case 'h5'
-                            if ~DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done || force
+                            if ~isfield(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}),'h5done') || ~DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done || force
                                 DES = h5_func(DES,coh,ci,wk,wi,ms,mi,ex,ei);
-                                save('D:\all_exp_description.mat','DES')
+                                save('/mnt/Toshiba_16TB_1/all_exp_description.mat','DES')
                             end
                         case 'frT'
-                            if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).frTdone==0 || force
+                            if ~isfield(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}),'frTdone') || DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).frTdone==0 || force
                                 DES = frT_func(DES,coh,ci,wk,wi,ms,mi,ex,ei);
-                                save('D:\all_exp_description.mat','DES')
+                                save('/mnt/Toshiba_16TB_1/all_exp_description.mat','DES')
                             end
                         case 'stimA'
-                            if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone==0 || force
+                            if ~isfield(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}),'stimAdone') || DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone==0 || force
                                 DES = stimA_func(DES,coh,ci,wk,wi,ms,mi,ex,ei,whichSegments);
-                                save('D:\all_exp_description.mat','DES')
+                                save('/mnt/Toshiba_16TB_1/all_exp_description.mat','DES')
                             end
                         case 'stim'
                             stim_func(DES,coh,ci,wk,wi,ms,mi,ex,ei)
                         case 'sync'
-                            if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).syncdone==0 || force
+                            if ~isfield(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}),'syncdone') || DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).syncdone==0 || force
                             if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==1 && ...
                                DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone==1
                                 DES = sync_func(DES,coh,ci,wk,wi,ms,mi,ex,ei,force);
-                                save('D:\all_exp_description.mat','DES')
+                                save('/mnt/Toshiba_16TB_1/all_exp_description.mat','DES')
                             else
                                 fprintf('%s, %s, %s, %s: ERROR: Both h5 and stimA need to be done\n',coh{ci},wk{wi},ms{mi},ex{ei})
                             end
@@ -111,6 +111,7 @@ for ci=1:numel(coh)
                     %% 
                     display(getReport(ME))
                     fprintf('%s, %s, %s, %s: CRASH\n',coh{ci},wk{wi},ms{mi},ex{ei})
+                    
                     keyboard
                 end
                 end
@@ -126,7 +127,7 @@ return
 %---------------------------------------------------------------------------
 function info_func(DES,coh,ci,wk,wi,ms,mi,ex,ei)
 
-if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==0
+if ~isfield(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}),'h5done') || DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==0
     fprintf('%s, %s, %s, %s: h5 not done\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
 if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done==2
@@ -150,7 +151,7 @@ end
 if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).stimAdone==-1
     fprintf('%s, %s, %s, %s: stimA error\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
-if DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).syncdone==0
+if ~isfield(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}),'syncdone') || DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).syncdone==0
     fprintf('%s, %s, %s, %s: sync not done\n',coh{ci},wk{wi},ms{mi},ex{ei})
 end
 return
@@ -310,19 +311,27 @@ if isfile(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stim.mat')
     load(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stim.mat'));
     if ~isfield(stim,'Values') || force
         if contains(upper(ex{ei}),'CONTRAST')
-            load('D:\2 visual stimulus files\contrast2.mat')
-            stim.expType='contrast';
-            stim.IDs=[Stims; Stims;];      
+            if strcmp(coh{ci},'coh3')
+                load('/mnt/Toshiba_16TB_1/2 visual stimulus files/stimfiles2023/contrast2023.mat');
+                stim.expType='contrast';
+                stim.IDs=Stims(:,1);
+                stim.Angles=Stims(:,2);
+                StimTyps=StimTypes;
+            else
+                load('/mnt/Toshiba_16TB_1/2 visual stimulus files/contrast2.mat')
+                stim.expType='contrast';
+                stim.IDs=[Stims; Stims;];
+            end
         elseif contains(upper(ex{ei}),'DR')
-            load('D:\2 visual stimulus files\direction.mat')
+            load('/mnt/Toshiba_16TB_1/2 visual stimulus files/direction.mat')
             stim.expType='DR';
             stim.IDs=Stims;
         elseif contains(upper(ex{ei}),'OR')
-            load('D:\2 visual stimulus files\orientation.mat')
+            load('/mnt/Toshiba_16TB_1/2 visual stimulus files/orientation.mat')
             stim.expType='OR';
             stim.IDs=Stims;
         elseif contains(upper(ex{ei}),'RF')
-            load('D:\2 visual stimulus files\RF.mat')
+            load('/mnt/Toshiba_16TB_1/2 visual stimulus files/RF.mat')
             stim.expType='RF';
             [uS, ~, pos2] = unique(cellcenter,'rows');
             stim.uniquePos=uS;
@@ -330,11 +339,11 @@ if isfile(fullfile(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath,'stim.mat')
             StimTyps=(1:60)';
             stim.posIDs=pos2;
         elseif contains(upper(ex{ei}),'SF')
-            load('D:\2 visual stimulus files\SF.mat')
+            load('/mnt/Toshiba_16TB_1/2 visual stimulus files/SF.mat')
             stim.expType='SF';
             stim.IDs=[Stims(1:100); Stims(1:100); Stims(1:100); Stims(1:100)];
         elseif contains(upper(ex{ei}),'TF')
-            load('D:\2 visual stimulus files\TF.mat')
+            load('/mnt/Toshiba_16TB_1/2 visual stimulus files/TF.mat')
             stim.expType='TF';
             stim.IDs=[Stims(1:100); Stims(1:100); Stims(1:100); Stims(1:100)];
         elseif contains(upper(ex{ei}),'OO')

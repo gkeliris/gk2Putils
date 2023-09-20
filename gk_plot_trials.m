@@ -1,5 +1,5 @@
-function gk_plot_trials(sig, roiNum, stimValues, plotShadedSEM)
-% USAGE: gk_plot_trials(sig, roiNum, stimValues, [plotShadedSEM=false])
+function gk_plot_trials(sig, roiNum, grp, stimValues, plotShadedSEM)
+% USAGE: gk_plot_trials(sig, roiNum, grp, stimValues, [plotShadedSEM=false])
 %
 % Function that plots the time courses for different stimulus types
 %
@@ -12,16 +12,22 @@ function gk_plot_trials(sig, roiNum, stimValues, plotShadedSEM)
 % v1.0 - 16 Oct 2022 
 
 
-if nargin == 3
+if nargin == 4
     plotShadedSEM = false;
 end
 
-sigMean = squeeze(mean(sig.trials_dF_F(roiNum,:,:,:),3));
+%sigMean = squeeze(mean(sig.trials_dF_F(roiNum,:,:),3));
+sigMean = cellfun(@(x) squeeze(mean(x(roiNum,:,:),3)'),sig.sorted_trials_dF_F,'UniformOutput',false);
+sigMean = [sigMean{:,grp}];
 p = plot(sig.t,sigMean);
 
 if plotShadedSEM
-    Ntrials = size(sig.trials,3);    
-    sigSEM  = squeeze(std(sig.trials_dF_F(roiNum,:,:,:),0,3)./sqrt(Ntrials));
+    %Ntrials = size(sig.trials,3);
+    % = cellfun(@(x) size(x,3),sig.sorted_trials_dF_F,'UniformOutput',false);
+
+    %sigSEM  = squeeze(std(sig.trials_dF_F(roiNum,:,:),0,3)./sqrt(Ntrials));
+    sigSEM = cellfun(@(x) squeeze(std(x(roiNum,:,:),0,3)'./sqrt(size(x,3))),sig.sorted_trials_dF_F,'UniformOutput',false);
+    sigSEM = [sigSEM{:,grp}];
     if numel(stimValues)==1
         shadedErrorBar(sig.t,sigMean,sigSEM,...
             'lineprops',{'Color', p(1).Color}, 'transparent', 1);
