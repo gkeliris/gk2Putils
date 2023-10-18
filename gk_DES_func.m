@@ -71,10 +71,10 @@ for ci=1:numel(coh)
                             info_func(DES,coh,ci,wk,wi,ms,mi,ex,ei);
                         case 'cdProc'
                             cd(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).procPath);
-                            keyboard;
+                            %keyboard;
                         case 'cdRaw'
                             cd(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath);
-                            keyboard;
+                            %keyboard;
                         case 'h5'
                             if ~isfield(DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}),'h5done') || ~DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).h5done || force
                                 DES = h5_func(DES,coh,ci,wk,wi,ms,mi,ex,ei);

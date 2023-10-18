@@ -28,8 +28,9 @@ for i=[whichSegments] %1:length(tiffSegments)
    fprintf("\tProcessing TIFF segment %i of %i...\n", i, length(tiffSegments));
  %     fprintf("\tProcessing TIFF segment %i of %i...\n", i, length(whichSegments));
     try 
-        obj=scanimage.util.ScanImageTiffReader(fullfile(tiffSegments(i).folder, tiffSegments(i).name));
-        dat=data(obj);
+        dat=parallelReadTiff(fullfile(tiffSegments(i).folder, tiffSegments(i).name));
+        %obj=scanimage.util.ScanImageTiffReader(fullfile(tiffSegments(i).folder, tiffSegments(i).name));
+        %dat=data(obj);
     catch
         info=imfinfo(fullfile(tiffSegments(i).folder, tiffSegments(i).name));
         dat=zeros(info(1).Height,info(1).Width,numel(info));
@@ -38,15 +39,27 @@ for i=[whichSegments] %1:length(tiffSegments)
         end
     end
     [ts, zL] = gk_getTimeStamps(fullfile(tiffSegments(i).folder, tiffSegments(i).name));
-    nCh=numel(ts)/numel(unique(ts));
-    nZ=numel(zL);
     dat=reshape(dat,size(dat,1)*size(dat,2),size(dat,3));
-    MI=mean(dat(:,1:nCh*nZ:end),2);
-    QQ=quantile(MI,0.05);
-    lowVal=find(MI<QQ);
-   
-    stimA.v=[stimA.v; mean(dat(lowVal,nCh:nCh*nZ:end))'];
-    stimA.t=[stimA.t; ts(nCh:nCh*nZ:end)];
+    if i==whichSegments(1)
+        nCh=numel(ts)/numel(unique(ts));
+        nZ=numel(zL);
+    end
+    
+    for c=1:nCh
+        MI=mean(dat(:,c:nCh*nZ:end),2);
+        QQ(c)=quantile(MI,0.05);
+        lowVal{c}=find(MI<QQ(c));
+        if c==1
+            stimA.v=[stimA.v; mean(dat(lowVal{c},c:nCh*nZ:end))'];
+            stimA.t=[stimA.t; ts(c:nCh*nZ:end)];
+        else
+            if ~isfield(stimA,['v',num2str(c)])
+                stimA.(['v',num2str(c)])=[];
+            end
+            stimA.(['v',num2str(c)])=...
+                [stimA.(['v',num2str(c)]); mean(dat(lowVal{c},c:nCh*nZ:end))'];
+        end
+    end
 end
 
 fprintf("Full completed in %.2f s.\n", toc(tStart));

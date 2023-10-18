@@ -1,5 +1,5 @@
-function [sigMeanON, sigSemON] = gk_get_tuning(sig, roiNum)
-% USAGE: gk_get_tuning(sig, roiNum, stimValues)
+function [sigMeanON, sigSemON] = gk_get_CRF(sig, roiNum, stimValues)
+% USAGE: gk_get_CRF(sig, roiNum, stimValues)
 %
 % Function that gets the tuning function of roi/neuron
 %
@@ -7,13 +7,15 @@ function [sigMeanON, sigSemON] = gk_get_tuning(sig, roiNum)
 %        roiNum - the number of the roi/neuron in sig
 %
 % Author: Georgios A. Keliris
-% v1.0 - 27 Dec 2022 
+% v1.0 - 27 Dec 2022
 
-Ntrials = size(sig.trials_ONresp,2); 
-sigMeanON = squeeze(mean(sig.trials_ONresp(roiNum,:,:),2));
-sigSemON = squeeze(std(sig.trials_ONresp(roiNum,:,:),0,2)./sqrt(Ntrials));
 
-%sigMeanOFF= squeeze(mean(sig.trials_OFFresp(roiNum,:,:),2));
-%sigSemOFF = squeeze(std(sig.trials_OFFresp(roiNum,:,:),0,2)./sqrt(Ntrials));
-
+for grp=1:numel(xpr.grp)
+    
+    sigMeanON = cellfun(@(x) squeeze(mean(x(roiNum,:),2)),sig.sorted_trials_ONresp,'UniformOutput',false);
+    sigMeanON = [sigMeanON{:,grp}];
+    
+    sigSemON = cellfun(@(x) squeeze(std(x(roiNum,:),0,2)./sqrt(size(x,2))),sig.sorted_trials_ONresp,'UniformOutput',false);
+    sigSemON = [sigSemON{:,grp}];
+end
 return

@@ -1,5 +1,12 @@
-function xpr = gk_getTunedROIs(xpr,p_thr)
+function xpr = gk_getTunedROIs(coh,wk,ms,ex,sig,before,after,p_thr)
+% USAGE: xpr = gk_getTunedROIs(coh,wk,ms,ex,sig,before,after,p_thr)
+%
+% INPUT:
+%
+% Author: Georgios A. Keliris
+Fneu_factor=0;
 
+xpr = gk_exp_getSigTrials(coh,wk,ms,ex,sig,before,after,Fneu_factor);
 if isfield(xpr,'stimAngles')
     nGrps=numel(unique(xpr.stimAngles));
 else
@@ -27,3 +34,4 @@ xpr.pThr=p_thr;
 xpr.isOnTuned_allGrp=xpr.pONmin<p_thr;
 xpr.onTunedIDs_allGrp = find(xpr.isOnTuned_allGrp);
 [~, xpr.sortedOnTunedIDs_allGrp]= sort(xpr.pONmin(xpr.onTunedIDs_allGrp));
+xpr.tunedGlobalIDs=xpr.cellIDs(xpr.onTunedIDs_allGrp(xpr.sortedOnTunedIDs_allGrp));

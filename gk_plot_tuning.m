@@ -1,4 +1,4 @@
-function gk_plot_tuning(sig, roiNum, grp, stimValues, xlabelStr)
+function gk_plot_tuning(sig, cellNum, grp, stimValues, xlabelStr)
 % USAGE: gk_plot_tuning(sig, roiNum, grp, stimValues, [xlabelStr])
 %
 % Function that plots the tuning function of roi/neuron
@@ -11,28 +11,34 @@ function gk_plot_tuning(sig, roiNum, grp, stimValues, xlabelStr)
 % Author: Georgios A. Keliris
 % v1.0 - 16 Oct 2022 
 
-
 if nargin == 4
     xlabelStr = 'stimulus parameter';
 end
 
 %Ntrials = size(sig.trials_ONresp,2); 
 %sigMeanON = squeeze(mean(sig.trials_ONresp(roiNum,:,:),2));
-sigMeanON = cellfun(@(x) squeeze(mean(x(roiNum,:),2)),sig.sorted_trials_ONresp,'UniformOutput',false);
+sigMeanON = cellfun(@(x) squeeze(mean(x(cellNum,:),2)),sig.sorted_trials_ONresp,'UniformOutput',false);
 sigMeanON = [sigMeanON{:,grp}];
 %sigSemON = squeeze(std(sig.trials_ONresp(roiNum,:,:),0,2)./sqrt(Ntrials));
-sigSemON = cellfun(@(x) squeeze(std(x(roiNum,:),0,2)./sqrt(size(x,2))),sig.sorted_trials_ONresp,'UniformOutput',false);
+sigSemON = cellfun(@(x) squeeze(std(x(cellNum,:),0,2)./sqrt(size(x,2))),sig.sorted_trials_ONresp,'UniformOutput',false);
 sigSemON = [sigSemON{:,grp}];
 %sigMeanOFF= squeeze(mean(sig.trials_OFFresp(roiNum,:,:),2));
 %sigSemOFF = squeeze(std(sig.trials_OFFresp(roiNum,:,:),0,2)./sqrt(Ntrials));
 
-errorbar(stimValues,sigMeanON,sigSemON,'ko-','MarkerFaceColor',[0 0 0]);
+errorbar(stimValues,sigMeanON,sigSemON,'ko','MarkerFaceColor',[0 0 0]);
 yline([0],'--');
 xlabel(xlabelStr);
 %xlim padded
 %ylim padded
 ylabel('\DeltaF/F');
-title(['ROI#: ' num2str(roiNum)]);
+%title(['ROI#: ' num2str(cellNum)]);
+title(['CELL#: ' num2str(cellNum) ', ROI#: ' num2str(sig.cellIDs(cellNum))]);
+
+params=FitNakaRushton(stimValues./100,double(sigMeanON)');
+fineContrast = linspace(0,1,100);
+predict = ComputeNakaRushton(params,fineContrast);
+hold on;
+plot(fineContrast*100,predict,'r','LineWidth',2);
 
 % binangles=round(10000*(sigMeanON-min(sigMeanON))./sum(sigMeanON-min(sigMeanON)));
 % samples=[];

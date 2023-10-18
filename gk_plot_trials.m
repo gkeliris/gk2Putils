@@ -1,5 +1,5 @@
-function gk_plot_trials(sig, roiNum, grp, stimValues, plotShadedSEM)
-% USAGE: gk_plot_trials(sig, roiNum, grp, stimValues, [plotShadedSEM=false])
+function gk_plot_trials(sig, cellNum, grp, stimValues, plotShadedSEM)
+% USAGE: gk_plot_trials(sig, cellNum, grp, stimValues, [plotShadedSEM=false])
 %
 % Function that plots the time courses for different stimulus types
 %
@@ -16,8 +16,7 @@ if nargin == 4
     plotShadedSEM = false;
 end
 
-%sigMean = squeeze(mean(sig.trials_dF_F(roiNum,:,:),3));
-sigMean = cellfun(@(x) squeeze(mean(x(roiNum,:,:),3)'),sig.sorted_trials_dF_F,'UniformOutput',false);
+sigMean = cellfun(@(x) squeeze(mean(x(cellNum,:,:),3)'),sig.sorted_trials_dF_F,'UniformOutput',false);
 sigMean = [sigMean{:,grp}];
 p = plot(sig.t,sigMean);
 
@@ -26,7 +25,7 @@ if plotShadedSEM
     % = cellfun(@(x) size(x,3),sig.sorted_trials_dF_F,'UniformOutput',false);
 
     %sigSEM  = squeeze(std(sig.trials_dF_F(roiNum,:,:),0,3)./sqrt(Ntrials));
-    sigSEM = cellfun(@(x) squeeze(std(x(roiNum,:,:),0,3)'./sqrt(size(x,3))),sig.sorted_trials_dF_F,'UniformOutput',false);
+    sigSEM = cellfun(@(x) squeeze(std(x(cellNum,:,:),0,3)'./sqrt(size(x,3))),sig.sorted_trials_dF_F,'UniformOutput',false);
     sigSEM = [sigSEM{:,grp}];
     if numel(stimValues)==1
         shadedErrorBar(sig.t,sigMean,sigSEM,...
@@ -45,7 +44,7 @@ xline(0,':','stim ON');
 xline(sig.stim_dur,':','stim OFF');
 xlabel('time [s]')
 ylabel('\DeltaF/F')
-legend(num2str(stimValues),'Location','northeast');
-title(['ROI#: ' num2str(roiNum)]);
+legend(num2str(stimValues),'Location','northwest');
+title(['CELL#: ' num2str(cellNum) ', ROI#: ' num2str(sig.cellIDs(cellNum))]);
 
 return

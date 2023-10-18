@@ -39,10 +39,6 @@ for i=1:length(tiffSegments)
 % % %     ts = header.frameTimestamps_sec(1:nCh:end);
 % % %     zLevels = header.SI.hFastZ.numFramesPerVolume;
     % Method 3 (GAK fast script)
-   
-
-
-
     [ts, z] = gk_getTimeStamps(...
         fullfile(tiffSegments(i).folder, tiffSegments(i).name));
     ts = unique(ts);
@@ -52,10 +48,12 @@ for i=1:length(tiffSegments)
     fprintf("\t\tcompleted at %.2f s.\n", toc(tStart));
 end
 if rem(numel(frame_t),zLevels)
-    frame_t=reshape(frame_t(1:end-rem(numel(frame_t),zLevels)),...
-        [zLevels (numel(frame_t)-rem(numel(frame_t),zLevels))/zLevels]);
-    fprintf('Warning: a not complete image frame at the end was removed\n');
-else
-    frame_t = reshape(frame_t, [zLevels numel(frame_t)/zLevels]);
+    frame_t = [frame_t; NaN*zeros(zLevels-rem(numel(frame_t),zLevels),1)];
+%     frame_t=reshape(frame_t(1:end-rem(numel(frame_t),zLevels)),...
+%         [zLevels (numel(frame_t)-rem(numel(frame_t),zLevels))/zLevels]);
+%     fprintf('Warning: a not complete image frame at the end was removed\n');
+% else
 end
+    frame_t = reshape(frame_t, [zLevels numel(frame_t)/zLevels]);
+%end
 fprintf("Full completed in %.2f s.\n", toc(tStart));

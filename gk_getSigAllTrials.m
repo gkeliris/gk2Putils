@@ -1,4 +1,7 @@
 function sig = gk_getSigAllTrials(sigMat, stim, t_before_sec, t_after_sec)
+% USAGE: sig = gk_getSigAllTrials(sigMat, stim, t_before_sec, t_after_sec)
+%
+% Author: Georgios A. Keliris
 
 sig.expType=stim.expType;
 
@@ -36,7 +39,7 @@ for tr=1:numel(i_from)
 end
 temp=sigMat(:,fromTo);
 sig.trials= reshape(temp,[size(temp,1), trial_dur, numel(i_from)]);
-sig.trials_dF_F = (sig.trials ./ repmat(mean(sig.trials(:,1:t_before_frames,:),2),[1,trial_dur,1])) - 1 ;
+sig.trials_dF_F = (sig.trials ./ repmat(mean(sig.trials(:,t_before_frames-3:t_before_frames+1,:),2),[1,trial_dur,1])) - 1 ;
 sig.trials_ONresp = squeeze(mean(sig.trials_dF_F(:,t_before_frames+3:t_before_frames+t_dur,:),2));
 %sig.trials_OFFresp = squeeze(mean(sig.trials_dF_F(:,t_before_frames+t_dur+3:t_before_frames+t_dur+t_after_frames-3,:),2));
 

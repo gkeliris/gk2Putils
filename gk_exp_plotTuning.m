@@ -1,9 +1,12 @@
 function gk_exp_plotTuning(coh,wk,ms,ex,sigName,t_before,t_after,whichROI,pthr)
+% USAGE: gk_exp_plotTuning(coh,wk,ms,ex,sigName,t_before,t_after,whichROI,pthr)
+%
+% Author: Georgios A. Keliris
 
 exportPath='/mnt/12TB_HDD_6/ThinkmateB_HDD6_Data/GKeliris/PPT_log';
 
-xpr = gk_exp_getSigTrials(coh,wk,ms,ex,sigName,t_before,t_after);
-xpr = gk_getTunedROIs(xpr,pthr);
+xpr = gk_getTunedROIs(coh,wk,ms,ex,sigName,t_before,t_after,pthr);
+
 if size(xpr.onTunedIDs_allGrp,1)==0
     fprintf('No tuned neurons, try with a relaxed statistical pThreshold\n');
     return
@@ -31,7 +34,9 @@ switch xpr.expType
 end
 
 if isnumeric(whichROI)
-    ROIs=whichROI;
+    for wi=1:numel(whichROI)
+        ROIs(wi)=find(xpr.cellIDs==whichROI(wi));
+    end
 else
     switch whichROI
         case 'sortedOnTuned'
@@ -50,35 +55,42 @@ for roi=ROIs
         angles={'0','90','120','210'};
 
         for g=1:numel(xpr.grp)
-            subplot(2,4,2*(g-1)+1);
-            gk_plot_trials(xpr, roi, g, xpr.stimValues, false)
-%             for stm=1:14
-%                 %trialInd = find(xpr.stimIDs==stm & xpr.stimAngles==g);
-%                 %select = gk_selectTrials(xpr, stm, g);
-%                 
-%             end
-            title(['ROI#=', num2str(roi), ', angle=', angles{g}]);
+            %subplot(2,4,2*(g-1)+1);
+            subplot(2,4,g);
+            if numel(whichROI)==1
+                gk_plot_trials(xpr, roi, g, xpr.stimValues, true)
+            else
+                gk_plot_trials(xpr, roi, g, xpr.stimValues, false)
+            end
+            ylim([-0.5 2])
+            title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', angles{g}]);
             legend off
-            subplot(2,4,2*g);
+            %subplot(2,4,2*g);
+            subplot(2,4,4+g);
+
             gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl)
-            title(['ROI#=', num2str(roi), ', angle=', angles{g}]);
+            ylim([-0.2 1.8])
+            title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', angles{g}]);
         end
        
 
     else
         g=1;
-
         subplot(1,2,1);
-        gk_plot_trials(xpr.grp(g), roi, xpr.grp(g).stimValues, false)
+        gk_plot_trials(xpr, roi, g, xpr.stimValues, false)
         subplot(1,2,2);
-        gk_plot_tuning(xpr.grp(g), roi, xpr.grp(g).stimValues, xlabl)
+        gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl)
 
     end
-
-    if ~export
+    
+    if numel(whichROI)==1
+        return
+    elseif ~export
         pause(0.05);
         input('press enter to continue or ctrl-c to exit\n')
-        clf
+        if n<numel(ROIs)
+            clf
+        end
     else
         if n==1
         set(gcf, 'Color', [1 1 1],'Position',[0 0 1400 1080])

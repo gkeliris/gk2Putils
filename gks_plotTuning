@@ -1,0 +1,6 @@
+figure; hold on; n=7;
+gk_plot_tuning(xpr,ROIs(n),1,xpr.stimValues);
+gk_plot_tuning(xpr,ROIs(n),2,xpr.stimValues);
+gk_plot_tuning(xpr,ROIs(n),3,xpr.stimValues);
+gk_plot_tuning(xpr,ROIs(n),4,xpr.stimValues);
+
