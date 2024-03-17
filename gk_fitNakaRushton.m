@@ -1,4 +1,4 @@
-function fit = gk_fitNakaRushton(coh,wk,ms,ex,sig,bef,aft,pval,plt)
+function fit = gk_fitNakaRushton(coh,wk,ms,ex,sig,bef,aft,pval,plt,ROI)
 % USAGE: fit = gk_fitNakaRushton(coh,wk,ms,ex,[plt])
 %     or fit = gk_fitNakaRushton(CRF,[plt]);
 %
@@ -18,22 +18,27 @@ end
 if plt
     fineContrast = linspace(0,1,100);
 end
-
+if nargin==10
+    cells=ROI;
+else
+    cells=1:numel(CRF.roiNums);
+end
 fit.CRF = CRF;
 contrast=CRF.stimValues'/100;
-for i=1:numel(CRF.roiNums)
+
+for i=[cells]
     response=double(CRF.sigMean(i,:));
     
     if CRF.lowCon(i)      
-        [fit.single.params{i}, fit.single.f(i)] = FitNakaRushton(contrast,response);
-        [fit.double.params{i}, fit.double.f(i)] = FitDoubleNakaRushton(contrast,response,[2 0.05 2.4 2 0.2 2.4]);
+        [fit.single.params{i}, fit.single.f(i), fit.single.R2(i)] = FitNakaRushton(contrast,response);
+        [fit.double.params{i}, fit.double.f(i), fit.double.R2(i)] = FitDoubleNakaRushton(contrast,response,[2 0.05 2.4 2 0.2 2.4]);
         if fit.single.f(i)<=1.5*fit.double.f(i)
             fit.select(i)=1;
         else
             fit.select(i)=2;
         end
     else
-        [fit.single.params{i}, fit.single.f(i)] = FitNakaRushton(contrast,response);
+        [fit.single.params{i}, fit.single.f(i), fit.single.R2(i)] = FitNakaRushton(contrast,response);
         fit.select(i)=1;
     end
 

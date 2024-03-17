@@ -1,4 +1,4 @@
-function [params,f, R2] = FitDoubleNakaRushton(contrast,response,params0)
+function [params,f, R2] = FitNakaRushton(contrast,response,params0)
 % [params,f] = FitNakaRushton(contrast,response [, params0])
 %
 % Find the parameters that best fit the data.  If the initial guess
@@ -30,9 +30,6 @@ if (nargin < 3 || isempty(params0))
     params0(1) = max(response);
     params0(2) = mean(contrast);
     params0(3) = 2;
-    params0(4)= 0;
-    params0(5) = 1;
-    params0(6) = 2;
 end
 
 % Set up minimization options
@@ -42,10 +39,8 @@ if ~IsOctave
     options = optimset(options,'LargeScale','off');
 end
 
-% vlb = [0      0.001     0.001 0 0.001 0.001]';
-% vub = [1000   100000    100 1000 100000 100]';
-vlb = [0  0.001  0.5 0  0.001 0.5]'; %min
-vub = [10 1 10  10 1 10]';  %max
+vlb = [0  0.001 0.5]';
+vub = [10   1  10]';
 params = fmincon(@(params)FitNakaRushtonFun(params,contrast,response),params0,[],[],[],[],vlb,vub,[],options);
 [f, R2] = FitNakaRushtonFun(params,contrast,response);
 
@@ -61,7 +56,7 @@ function [f, R2] = FitNakaRushtonFun(params,contrast,response)
 % 8/2/07    dhb         Get rid of silly call to ComputeNakaRushtonError.
 
 % Unpack paramters, make predictions
-prediction = ComputeDoubleNakaRushton(params,contrast);
+prediction = ComputeNakaRushton(params,contrast);
 nPoints = length(prediction);
 yMean=sum(prediction)/nPoints;
 error = prediction-response;

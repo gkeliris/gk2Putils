@@ -14,6 +14,7 @@ for r=1:numel(roiNums)
     
     for grp=1:numel(sig.grp)
         
+        
         tmp = cellfun(@(x) squeeze(mean(x(roiNum,:),2)),sig.sorted_trials_ONresp,'UniformOutput',false);
         sigMean(grp,:) = [tmp{:,grp}];
         
@@ -29,9 +30,11 @@ for r=1:numel(roiNums)
     else
         crfs.lowCon(r,1)=0;
     end
+    crfs.allTrials{r} = cellfun(@(x) x(roiNum,row),sig.sorted_trials_ONresp,'UniformOutput',false);
 end
 crfs.lowSum=sum(crfs.lowCon);
 crfs.lowPerc=crfs.lowSum/numel(crfs.lowCon)*100;
 crfs.roiNums=roiNums';
 crfs.stimValues=sig.stimValues;
+crfs.allTrials=sig.sorted_trials_ONresp;
 return

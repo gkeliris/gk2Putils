@@ -36,8 +36,9 @@ else
     coh={coh};
 end
 if ~exist('wk') || isempty(wk)
-    wk=fieldnames(DES.coh1);
+    wkset=1;
 else
+    wkset=0;
     wk={wk};
 end
 if ~exist('ms') | isempty(ms)
@@ -52,9 +53,12 @@ else
     exset=0;
     ex={ex};
 end
-
+datID=0;
 % loop over cohorts, week, mice and perform "func"
 for ci=1:numel(coh)
+    if wkset
+        wk=fieldnames(DES.(coh{ci}));
+    end
     for wi=1:numel(wk)
         if msset
             ms=fieldnames(DES.(coh{ci}).(wk{wi}));
@@ -67,6 +71,14 @@ for ci=1:numel(coh)
                 if ~strcmp('Spon',ex{ei}) && ~strcmp('Spon2',ex{ei}) && ~strcmp('Spon_1106',ex{ei})
                 try
                     switch func
+                        case 'toTable'
+                            datID=datID+1;
+                            cohort{datID,1}=coh{ci};
+                            week{datID,1}=wk{wi};
+                            mouseID{datID,1}=ms{mi};
+                            expID{datID,1}=ex{ei};
+                            rawPath{datID,1}=DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).rawPath;
+                            firstTiff{datID,1}=DES.(coh{ci}).(wk{wi}).(ms{mi}).(ex{ei}).firstTiff;
                         case 'done_info'
                             info_func(DES,coh,ci,wk,wi,ms,mi,ex,ei);
                         case 'cdProc'
@@ -119,6 +131,13 @@ for ci=1:numel(coh)
 
         end
     end
+end
+switch func
+    case 'toTable'
+        datID=[1:datID]';
+        MECP2_datasets=table(datID,cohort,week,mouseID,expID,rawPath,firstTiff);
+        save('MECP2_datasets','MECP2_datasets')
+        writetable(MECP2_datasets,'MECP2_datasets.csv')
 end
 return
 

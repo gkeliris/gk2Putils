@@ -1,5 +1,5 @@
-function [sigMean, sigSem] = gk_get_CRF(sig, roiNums, )
-% USAGE: crfs = gk_get_CRFs(sig, roiNums)
+function [sigMean, sigSem] = gk_get_CRF(sig, roiNums, best)
+% USAGE: crfs = gk_get_CRFs(sig, roiNums, best)
 %
 % Function that gets the tuning function of roi/neuron
 %
