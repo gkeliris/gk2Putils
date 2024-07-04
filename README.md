@@ -1,5 +1,6 @@
 # gk2Putils
 
+For formatting a markdown document check: (https://commonmark.org/help/)
 
 ## Functions for syncronization of stimulus to imaging
 gk_readH5  
