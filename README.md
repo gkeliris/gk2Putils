@@ -5,8 +5,16 @@ For formatting a markdown document check: (https://commonmark.org/help/)
 ---
 ## Setting up
 - fork the [gk2Putils](https://github.com/gkeliris/gk2Putils) repository
-- clone your **own** forked repository
+- [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) your **own** forked repository
 - create a new branch to work with
+    > git branch BRANCHNAME
+- activate the branch by using checkout
+    > git checkout BRANCHNAME
+- make changes, add, and commit them to your branch
+    > git add .  
+    > git commit -m "TYPE COMMIT MESSAGE"
+- push the branch to your own remote fork
+    > git push --set-upstream origin BRANCHNAME
 
 ## Get started by selecting which dataset(s) to analyze:
 For this:
