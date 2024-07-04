@@ -8,6 +8,9 @@ function gk_plotNakaRushton(fit, ROInum)
 % GAK Nov 2023
 %
 % See also gk_fitNakaRushton
+if nargin<2
+    ROInum=1;
+end
 
 figure;
 i=ROInum;

@@ -40,3 +40,11 @@ If something changed on the data location then set the correct paths
     + The upper row of plots is using: **gk_plot_trials.m**  
     + The lower row of plots is using: **gk_plot_tuning.m**  <-- *Needs to be adjusted*
 
+- Calculate the contrast response functions (single vs double NakaRushton)
+    > CRF = gk_get_CRFs(xpr, cell)
+
+- Fit a NakaRuston function
+    > fit = gk_fitNakaRushton(CRF,1)
+
+- Plot the CRF with fitted NakaRushton
+    > gk_plotNakaRushton(fit)
