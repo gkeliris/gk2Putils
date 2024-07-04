@@ -1,6 +1,13 @@
 # gk2Putils
-
+---
 For formatting a markdown document check: (https://commonmark.org/help/)
+
+---
+## Get started by selecting which dataset(s) to analyze:
+For this:
+1) prepare/update a .csv file that contains information such as path of the raw datasets
+2) 
+
 
 ## Functions for syncronization of stimulus to imaging
 gk_readH5  
