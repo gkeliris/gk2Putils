@@ -9,5 +9,3 @@ ds = gk_selectDS(ds);
 dataPath = setDataPath;
 sesPath = fullfile(dataPath,'s2p_analysis',...
     ds.cohort,ds.mouseID,ds.week,ds.session,ds.expID);
-
-

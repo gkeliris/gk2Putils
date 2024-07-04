@@ -17,6 +17,10 @@ if isnumeric(plane)
 end
 
 sesPath = setSesPath(ds);
+if ~isfile(fullfile(sesPath,'suite2p_orig',plane,[sigName,'.npy']))
+    error('.npy FILE NOT FOUND! Make sure dataset was preprocessed and try again.\n')
+    return
+end
 sig = readNPY(fullfile(sesPath,'suite2p_orig',plane,[sigName,'.npy']));
 
 

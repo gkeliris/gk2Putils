@@ -17,8 +17,8 @@ function gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr)
 %
 % See also gk_getTunedROIs, gk_plot_tuning, gk_plot_trials
 
-exportPath='/mnt/12TB_HDD_6/ThinkmateB_HDD6_Data/GKeliris/PPT_log';
-
+exportPath = setExportPath;
+ds = gk_selectDS(ds);
 xpr = gk_getTunedROIs(ds,sigName,t_before,t_after,pthr);
 
 if size(xpr.onTunedIDs_allGrp,1)==0
