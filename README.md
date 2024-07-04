@@ -3,6 +3,11 @@
 For formatting a markdown document check: (https://commonmark.org/help/)
 
 ---
+## Setting up
+- fork the [gk2Putils](https://github.com/gkeliris/gk2Putils) repository
+- clone your forked repository
+- create a new branch to work with
+
 ## Get started by selecting which dataset(s) to analyze:
 For this:
 1) prepare/update a .csv file that contains information such as path of the raw datasets
