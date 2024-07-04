@@ -1,12 +1,35 @@
-function select = gk_selectTrials(xpr, stimValue, angle)
+function select = gk_selectTrials(xpr, stimIndex, angleIndex)
+% USAGE: select = gk_selectTrials(xpr, [stimIndex], [angleIndex])
+%
+% INPUT:
+%       xpr         - the output of gk_getTunedROIs
+%       stimIndex   - the index of the stimulus (when not given a list will
+%                     be printed and a selection should be made)
+%       angleIndex  - the index of the angle (select when not given)
+%
+% OUTPUT:
+%       select  - a structure containing the selected trials
+%
+% Author: Georgios A. Keliris
 
-% if isstring(stimValue) && strcmp(upper(stimValue),'ALL')
-%     loop
+if nargin<2
+    fprintf('The stim list is the following:\n')
+    disp(table(unique(xpr.stimIDs), xpr.stimValues,'variableNames',{'stimIndex','stimValues'}))
+    datID = input('Please select one Index: ','s');
+    stimIndex = str2double(datID);
+end
+if nargin<3 && isfield(xpr,'stimAngles')
+    fprintf('\nThe angle list is the following:\n')
+    disp(table(unique(xpr.stimAngles), xpr.stimAnglesValues,'variableNames',{'angleIndex','angleValues'}))
+    datID = input('Please select one Index: ','s');
+    angleIndex = str2double(datID);
+end
 
-if exist('angle','var')
-    ind = find(xpr.stimIDs==stimValue & xpr.stimAngles==angle);
+
+if exist('angleIndex','var')
+    ind = find(xpr.stimIDs==stimIndex & xpr.stimAngles==angleIndex);
 else
-    ind = find(xpr.stimIDs==stimValue);
+    ind = find(xpr.stimIDs==stimIndex);
 end
 
 select.t=xpr.t;

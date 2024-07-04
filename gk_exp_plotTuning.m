@@ -1,11 +1,25 @@
-function gk_exp_plotTuning(coh,wk,ms,ex,sigName,t_before,t_after,whichROI,pthr)
-% USAGE: gk_exp_plotTuning(coh,wk,ms,ex,sigName,t_before,t_after,whichROI,pthr)
+function gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr)
+% USAGE: gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr)
+%
+% INPUT:
+%   ds :        the output of gk_datasetQuery
+%   sigName:    which signal ['F','Fneu','spks']
+%   t_before:   seconds before stim onset
+%   t_after:    seconds after stim offset
+%   whichROI:   a) numeric: the ROI number(s) (suite2p ROI index - global)
+%               b) string: 'export' => exports to PPT
+%                          'sortedOnTuned' plots sorted according to p-val
+%   pthr:       p-value to choose as threshold for tuned ROIs
+%
+%   calls -> gk_getTunedROIs, gk_plot_tuning, gk_plot_trials
 %
 % Author: Georgios A. Keliris
+%
+% See also gk_getTunedROIs, gk_plot_tuning, gk_plot_trials
 
 exportPath='/mnt/12TB_HDD_6/ThinkmateB_HDD6_Data/GKeliris/PPT_log';
 
-xpr = gk_getTunedROIs(coh,wk,ms,ex,sigName,t_before,t_after,pthr);
+xpr = gk_getTunedROIs(ds,sigName,t_before,t_after,pthr);
 
 if size(xpr.onTunedIDs_allGrp,1)==0
     fprintf('No tuned neurons, try with a relaxed statistical pThreshold\n');
@@ -62,14 +76,14 @@ for roi=ROIs
             else
                 gk_plot_trials(xpr, roi, g, xpr.stimValues, false)
             end
-            ylim([-0.5 2])
+            ylim([-0.5 3])
             title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', angles{g}]);
             legend off
             %subplot(2,4,2*g);
-            subplot(2,4,4+g);
-
+            h = subplot(2,4,4+g);
+            cla(h)
             gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl)
-            ylim([-0.2 1.8])
+            ylim([-0.2 2.8])
             title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', angles{g}]);
         end
        
@@ -93,10 +107,11 @@ for roi=ROIs
         end
     else
         if n==1
-        set(gcf, 'Color', [1 1 1],'Position',[0 0 1400 1080])
+        set(gcf, 'Color', [1 1 1],'Position',[0 0 1200 900])
         pptx = exportToPPTX();
         pptx.addSlide();
-        pptx.addTextbox(sprintf('Dataset: %s, %s, %s, %s\nSignal Type: %s\n',coh,wk,ms,ex,sigName));
+        pptx.addTextbox(sprintf('Dataset: %s, %s, %s, %s\nSignal Type: %s\n',...
+            ds.cohort,ds.week,ds.mouseID,ds.expID,sigName));
         pptx.addTextbox(sprintf('\n\n\nROIs (p < %f): N_tuned / N_total = %d / %d (%.1f %%)\n',...
             pthr,size(xpr.onTunedIDs_allGrp,1),size(xpr.isOnTuned_allGrp,1),...
             size(xpr.onTunedIDs_allGrp,1)/size(xpr.isOnTuned_allGrp,1)*100));
@@ -108,7 +123,8 @@ for roi=ROIs
 end
 if export
     try
-        pptx.save(fullfile(exportPath,['DS_',coh,'_',wk,'_',ms,'_',ex,'_',sigName]));
+        pptx.save(fullfile(exportPath,['DS_',ds.cohort{1},'_',ds.week{1},'_',...
+            ds.mouseID{1},'_',ds.expID{1},'_',sigName]));
         close all
     catch ME
         display(getReport(ME))

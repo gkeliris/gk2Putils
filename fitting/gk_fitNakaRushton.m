@@ -1,16 +1,19 @@
-function fit = gk_fitNakaRushton(coh,wk,ms,ex,sig,bef,aft,pval,plt,ROI)
-% USAGE: fit = gk_fitNakaRushton(coh,wk,ms,ex,[plt])
+function fit = gk_fitNakaRushton(ds,sigName,bef,aft,pval,plt,ROI)
+% USAGE: fit = gk_fitNakaRushton(ds,[plt])
 %     or fit = gk_fitNakaRushton(CRF,[plt]);
 %
 % Author: Georgios A. Keliris
+%
+% See also gk_CRF, gk_get_CRFs
+
 if nargin<3
     if nargin<2
         plt=false;
     end
-    CRF=coh;
+    CRF=ds;
     plt=wk;
 else
-    CRF = gk_CRF(coh,wk,ms,ex,sig,bef,aft,pval);
+    CRF = gk_CRF(ds,sigName,bef,aft,pval);
 end
 if nargin > 2 && nargin < 5
     plt=false;

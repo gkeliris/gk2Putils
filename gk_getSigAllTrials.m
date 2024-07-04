@@ -20,6 +20,7 @@ sig.stim_dur=median(stim.Times.offsets-stim.Times.onsets);
 sig.stimIDs=stim.IDs;
 if isfield(stim,'Angles')
     sig.stimAngles=stim.Angles;
+    sig.stimAnglesValues=stim.AnglesValues;
     grps=unique(stim.Angles);
     nGrps=numel(grps);
 else

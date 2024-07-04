@@ -1,15 +1,18 @@
-function gk_plot_tuning(sig, cellNum, grp, stimValues, xlabelStr)
-% USAGE: gk_plot_tuning(sig, roiNum, grp, stimValues, [xlabelStr])
+function gk_plot_tuning(xpr, cellNum, grp, stimValues, xlabelStr)
+% USAGE: gk_plot_tuning(xpr, cellNum, grp, stimValues, [xlabelStr])
 %
 % Function that plots the tuning function of roi/neuron
 %
-% Input: sig - a structure returned by gk_getSigTrials
-%        roiNum - the number of the roi/neuron in sig
-%        stimValues - the type of stimuli stored in stim.Values
+% Input: xpr - a structure returned by gk_exp_getSigTrials/gk_getTunedROIs
+%        cellNum - the number of the cell (not global ROI) in xpr
+%        grp - the group number
+%        stimValues - the type of stimuli stored in xpr.stimValues
 %        xlabelStr - a string to label the x axis (optional)
 %
 % Author: Georgios A. Keliris
-% v1.0 - 16 Oct 2022 
+% v1.0 - 16 Oct 2022
+%
+% See also FitNakaRushton, ComputeNakaRushton
 
 if nargin == 4
     xlabelStr = 'stimulus parameter';
@@ -17,10 +20,10 @@ end
 
 %Ntrials = size(sig.trials_ONresp,2); 
 %sigMeanON = squeeze(mean(sig.trials_ONresp(roiNum,:,:),2));
-sigMeanON = cellfun(@(x) squeeze(mean(x(cellNum,:),2)),sig.sorted_trials_ONresp,'UniformOutput',false);
+sigMeanON = cellfun(@(x) squeeze(mean(x(cellNum,:),2)),xpr.sorted_trials_ONresp,'UniformOutput',false);
 sigMeanON = [sigMeanON{:,grp}];
 %sigSemON = squeeze(std(sig.trials_ONresp(roiNum,:,:),0,2)./sqrt(Ntrials));
-sigSemON = cellfun(@(x) squeeze(std(x(cellNum,:),0,2)./sqrt(size(x,2))),sig.sorted_trials_ONresp,'UniformOutput',false);
+sigSemON = cellfun(@(x) squeeze(std(x(cellNum,:),0,2)./sqrt(size(x,2))),xpr.sorted_trials_ONresp,'UniformOutput',false);
 sigSemON = [sigSemON{:,grp}];
 %sigMeanOFF= squeeze(mean(sig.trials_OFFresp(roiNum,:,:),2));
 %sigSemOFF = squeeze(std(sig.trials_OFFresp(roiNum,:,:),0,2)./sqrt(Ntrials));
@@ -32,7 +35,7 @@ xlabel(xlabelStr);
 %ylim padded
 ylabel('\DeltaF/F');
 %title(['ROI#: ' num2str(cellNum)]);
-title(['CELL#: ' num2str(cellNum) ', ROI#: ' num2str(sig.cellIDs(cellNum))]);
+title(['CELL#: ' num2str(cellNum) ', ROI#: ' num2str(xpr.cellIDs(cellNum))]);
 
 params=FitNakaRushton(stimValues./100,double(sigMeanON)');
 fineContrast = linspace(0,1,100);

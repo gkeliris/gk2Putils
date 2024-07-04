@@ -6,6 +6,9 @@ function gk_plotNakaRushton(fit, ROInum)
 %   ROInum: the roi number to plot
 %
 % GAK Nov 2023
+%
+% See also gk_fitNakaRushton
+
 figure;
 i=ROInum;
 fineContrast = linspace(0,1,100);

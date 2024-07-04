@@ -1,4 +1,12 @@
-function gk_plot_cell(xpr,cellNum,shadedError)
+function gk_plot_cellTrialsTuning(xpr,cellNum,shadedError)
+% USAGE: gk_plot_cellTrialsTuning(xpr,cellNum,shadedError)
+%
+% INPUT:
+%       xpr - a structure returned by gk_exp_getSigTrials/gk_getTunedROIs
+%       cellNum - the number of the cell (not global ROI) in xpr
+%       shadedError - boolean will plot shadedErrors if true
+%
+% Author: Georgios A. Keliris
 
 multiGrp=false;
 switch xpr.expType
