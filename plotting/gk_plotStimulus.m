@@ -30,11 +30,21 @@ for s=1:N
     ind=find(stim.IDs==s);
     area(onoff(:,ind(2:end)),amp(:,ind(2:end)),'FaceColor',[1 0.95-0.95*(s-1)/(N-1) 0.95-0.95*(s-1)/(N-1)],'LineStyle','none')
 end
-if (strcmpi(ds.cohort,'coh1') || strcmpi(ds.cohort,'coh2')) && strcmpi(ds.expID,'contrast')
-    xline(stim.Times.onsets(1)-1,'b--');
-    xline(stim.Times.onsets(141)-1,'b--');
-    xline(stim.Times.onsets(281)-1,'b--');
-    xline(stim.Times.onsets(421)-1,'b--');
-    xline(stim.Times.onsets(end)+4,'b--');
+if (strcmpi(ds.cohort,'coh1') || strcmpi(ds.cohort,'coh2')) && strcmpi(ds.expID,'contrast') || strcmpi(ds.expID,'contrast2')
+    try
+        xline(stim.Times.onsets(1)-1,'b--');
+    end
+    try
+        xline(stim.Times.onsets(141)-1,'b--');
+    end
+    try
+        xline(stim.Times.onsets(281)-1,'b--');
+    end
+    try
+        xline(stim.Times.onsets(421)-1,'b--');
+    end
+    try
+        xline(stim.Times.onsets(end)+4,'b--');
+    end
 end
 legend(num2str(stim.Values),'location','EastOutside')
