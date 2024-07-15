@@ -37,9 +37,9 @@ ylabel('\DeltaF/F');
 %title(['ROI#: ' num2str(cellNum)]);
 title(['CELL#: ' num2str(cellNum) ', ROI#: ' num2str(xpr.cellIDs(cellNum))]);
 
-params=FitNakaRushton(stimValues./100,double(sigMeanON)');
+params= FitSuperNakaRushton(stimValues./100,double(sigMeanON)');
 fineContrast = linspace(0,1,100);
-predict = ComputeNakaRushton(params,fineContrast);
+predict = ComputeSuperNakaRushton(params,fineContrast);
 hold on;
 plot(fineContrast*100,predict,'r','LineWidth',2);
 
