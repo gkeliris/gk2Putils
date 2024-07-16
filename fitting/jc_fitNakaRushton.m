@@ -1,10 +1,13 @@
 function fit = jc_fitNakaRushton(ds,sigName,bef,aft,pval,plt,ROI)
-% USAGE: fit = gk_fitNakaRushton(ds,sigName,bef,aft,pval,[plt],[ROI])
-%     or fit = gk_fitNakaRushton(CRF,[plt],[ROI]);
+% USAGE: fit = jc_fitNakaRushton(ds,sigName,bef,aft,pval,[plt],[ROI])
+%     or fit = jc_fitNakaRushton(CRF,[plt],[ROI]);
 %
-% Author: Georgios A. Keliris
+% Author: James Colwell
 %
+%This is just a modification of gk_fitNakaRushton with the change to the
+%SuperNakaRushton Equation
 % See also gk_CRF, gk_get_CRFs
+
 
 if nargin<3
     if nargin<2
