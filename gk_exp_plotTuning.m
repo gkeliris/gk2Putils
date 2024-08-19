@@ -61,13 +61,23 @@ else
 
     end
 end
-
+if multiGrp
+    table_col_names = {'ROI','Rmax_0deg', 'c50_0deg', 'n_0deg','s_0deg','R2_0deg','MaxChange_0deg',...
+        'Rmax_90deg', 'c50_90deg', 'n_90deg','s_90deg','R2_90deg','MaxChange_90deg','Rmax_120deg',...
+        'c50_120deg', 'n_120deg', 's_120deg','R2_120deg','MaxChange_120deg','Rmax_210deg', 'c50_210deg',...
+        'n_210deg', 's_210deg','R2_210deg','MaxChange_210deg'};
+    table_col_type = {'double','double','double','double','double','double','double','double',...
+        'double','double','double','double','double','double','double','double','double',...
+        'double','double','double','double','double','double','double','double'};
+     params_table = table('Size', [numel(ROIs) numel(table_col_names)],'VariableTypes',...
+         table_col_type,'VariableNames',table_col_names);
+end  
 n=0;
 for roi=ROIs
     n=n+1;
     if multiGrp
         angles={'0','90','120','210'};
-
+        params_table.ROI(n) = xpr.cellIDs(roi);
         for g=1:numel(xpr.grp)
             %subplot(2,4,2*(g-1)+1);
             subplot(2,4,g);
@@ -82,7 +92,8 @@ for roi=ROIs
             %subplot(2,4,2*g);
             h = subplot(2,4,4+g);
             cla(h)
-            gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl)
+            params = gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl);
+            params_table{n, table_col_names((g-1)*6 + (2:7))} = params;
             ylim([-0.2 2.8])
             title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', angles{g}]);
         end
@@ -124,12 +135,18 @@ end
 if export
     try
         pptx.save(fullfile(exportPath,['DS_',ds.cohort{1},'_',ds.week{1},'_',...
-            ds.mouseID{1},'_',ds.expID{1},'_',sigName]));
+            ds.mouseID{1},'_',ds.session{1},'_',ds.expID{1},'_',sigName]));
         close all
     catch ME
         display(getReport(ME))
         keyboard
     end
+    %This is to save params table to excel 
+    params_exportPath = '/mnt/NAS_UserStorage/georgioskeliris/MECP2TUN/exported_params/';
+    params_file_name = ['DS_',ds.cohort{1},'_',ds.week{1},'_', ds.mouseID{1},'_',...
+        ds.expID{1},'_',ds.session{1},'_',sigName,'_CRF.xlsx'];
+    fullPath = fullfile(params_exportPath, params_file_name);
+    writetable(params_table, fullPath);
 end
 
 % %%%%
