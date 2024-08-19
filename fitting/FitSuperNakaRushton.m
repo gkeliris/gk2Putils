@@ -1,6 +1,16 @@
 function [params,f, R2] = FitSuperNakaRushton(contrast,response,params0)
+% USAGE: [params, f, R2] = FitSuperNakaRushton(contrast,response,params0)
+%
+% INPUT:
+%   contrast :  contrast data points
+%   response:   fluorescence data 
+%   params0:    optional first guess of parameters
+%  
+% OUTPUT:
+%   params:     paramters [asymptomatic value, c_50, n, s]
+%   f:          goodness of fit
+%   R2:         R squared term
 
-% If params0 isn't passed, try to pick a good default.
 if (nargin < 3 || isempty(params0))
    %For the Super Naka Rushton, Rmax is not the "max value", but rather
    %the asymptomatic value
@@ -20,7 +30,7 @@ if ~IsOctave
     options = optimset(options,'LargeScale','off');
 end
 
-%DELETE THIS COMMENT LATER: not sure about these upper and lower bounds
+%not sure about these upper and lower bounds
 vlb = [0  0.001 0.5 .8]';
 vub = [10   1  10 2]';
 params = fmincon(@(params)FitSuperNakaRushtonFun(params,contrast,response),params0,[],[],[],[],vlb,vub,[],options);
