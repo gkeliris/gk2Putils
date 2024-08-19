@@ -1,4 +1,11 @@
 function ds = jc_selectmanyDS(ds)
+% USAGE: ds = jc_selectmanyDS(ds)
+%
+% INPUT:
+%   ds :   the output of gk_datasetQuery
+%  
+% OUTPUT
+%   ds:    the mice wanted for the analysis
 
 
 if size(ds,1)>1
