@@ -1,4 +1,4 @@
-function gk_plot_tuning(xpr, cellNum, grp, stimValues, xlabelStr)
+function parameters = gk_plot_tuning(xpr, cellNum, grp, stimValues, xlabelStr)
 % USAGE: gk_plot_tuning(xpr, cellNum, grp, stimValues, [xlabelStr])
 %
 % Function that plots the tuning function of roi/neuron
@@ -11,6 +11,7 @@ function gk_plot_tuning(xpr, cellNum, grp, stimValues, xlabelStr)
 %
 % Author: Georgios A. Keliris
 % v1.0 - 16 Oct 2022
+% v2.0 - 19 Aug 2024
 %
 % See also FitNakaRushton, ComputeNakaRushton
 
@@ -37,11 +38,15 @@ ylabel('\DeltaF/F');
 %title(['ROI#: ' num2str(cellNum)]);
 title(['CELL#: ' num2str(cellNum) ', ROI#: ' num2str(xpr.cellIDs(cellNum))]);
 
-params= FitSuperNakaRushton(stimValues./100,double(sigMeanON)');
+[params, f,R2]= FitSuperNakaRushton(stimValues./100,double(sigMeanON)');
 fineContrast = linspace(0,1,100);
 predict = ComputeSuperNakaRushton(params,fineContrast);
 hold on;
 plot(fineContrast*100,predict,'r','LineWidth',2);
+%In case they just want to plot something
+if nargout > 0
+        parameters = [params R2 max(double(sigMeanON))];
+end
 
 % binangles=round(10000*(sigMeanON-min(sigMeanON))./sum(sigMeanON-min(sigMeanON)));
 % samples=[];
