@@ -1,4 +1,13 @@
 function [response] = ComputeSuperNakaRushton(params,contrast)
+% USAGE: [response] = ComputeSuperNakaRushton(params,contrast)
+%
+% INPUT:
+%   params:     given parameters
+%   contrast:   contrast values
+%
+% OUTPUT:
+%   response:   resultant datapoints from given parameters and contrast
+
 
 if (length(params) == 4)
     A = params(1);
