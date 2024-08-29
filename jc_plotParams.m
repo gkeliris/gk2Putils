@@ -1,19 +1,20 @@
-function jc_plotParams(ds,sigName,typeplot,angletype,weight,numbins, export)
+function jc_plotParams(ds,sigName,typeplot,angletype,weight, export, numbins)
 % USAGE: jc_plotParams(ds,sigName,typeplot,angletype,weight,numbins, export)
 %
 % INPUT:
 %   ds :        the output of gk_datasetQuery
 %   sigName:    which signal ['F','Fneu','spks']
-%   typeplot:   which type of plot ['boxplot','histogram]
+%   typeplot:   which type of plot ['boxplot','histogram,'cumulative']
 %   angletype:  how to plot angles ['angle','together']
 %   weight:     weight given to R2 vs max change in fluorescence, 1 just
 %   change in fluorescence, 0 is just R2
-%   numbins:    number of bins if chose histogram
 %   export:     if you want to export if chose histogram, 1 = yes, 0 = no
+%   numbins:    number of bins if chose histogram, choose 0 if you want to 
+%               choose the edges yourself
 %
 %   example: jc_plotparams(ds,'F','histogram','angle',.5,10,1)
 if nargin < 7
-    export = 0; 
+    numbins = 0; 
  elseif nargin < 6
      numbins = [];
      export = 0;
@@ -85,7 +86,15 @@ switch typeplot
                     subplot(2,2,i)
                     data = [temp.(table_col_names(1+col_nums(i))); temp.(table_col_names(5+col_nums(i)));...
                         temp.(table_col_names(9+col_nums(i))); temp.(table_col_names(13+col_nums(i)))];
+                    if numbins == 0
+                        prompt = sprintf('Please Enter the Edges for %s,the min and max are %f and %f: ',...
+                            titles(i), min(data), max(data));
+                        numbins = input(prompt);
+                    end
                     histogram(data,numbins);
+                    if numel(numbins) > 1
+                        numbins = 0;
+                    end
                     title(titles(i));
                 end
                 if export
@@ -116,7 +125,15 @@ switch typeplot
                 for i = 1:16
                     subplot(4,4,i)
                     data = temp.(table_col_names(i));
+                    if numbins == 0
+                        prompt = sprintf('Please Enter the Edges for %s,the min and max are %f and %f: ',...
+                            titles(i), min(data), max(data));
+                        numbins = input(prompt);
+                    end
                     histogram(data,numbins);
+                    if numel(numbins) > 1
+                        numbins = 0;
+                    end
                     title(titles(i));
                 end
                 if export
@@ -139,7 +156,104 @@ switch typeplot
                     fullFilePath = fullfile(hist_exportPath, hist_fileName);
                     writetable(temp_histtable, fullFilePath);
                 end
-        end 
+            
+        end
+    case 'cumulative'
+        switch angletype
+            case 'together'
+                figure
+                titles = ["Rmax", "c50", "n", "s"];
+                col_nums = [0 1 2 3];
+                for i = 1:4
+                    subplot(2,2,i)
+                    data = [temp.(table_col_names(1+col_nums(i))); temp.(table_col_names(5+col_nums(i)));...
+                        temp.(table_col_names(9+col_nums(i))); temp.(table_col_names(13+col_nums(i)))];
+                    cdfplot(data);
+                    title(titles(i));
+                    xlabel(titles(i));
+                end
+                if export
+                    cumu_data = cell(4, 2); 
+                    cumu_titles = cell(4, 1);
+                    cumu_exportPath = '/mnt/NAS_UserStorage/georgioskeliris/MECP2TUN/exported_cumulative/';
+                    cumu_fileName = input('Please enter a name for the cumulative file: ', 's');
+                    cumu_fileName = strcat(cumu_fileName,'.xlsx');
+                    for i = 1:4
+                        subplot(2,2,i);
+                        h = get(gca, 'Children');
+                        x = get(h, 'XData');
+                        y = get(h, 'YData');
+                        cumu_data{i, 1} = x;
+                        cumu_data{i, 2} = y;
+                        cumu_titles{i} = get(get(gca, 'Title'), 'String');
+                    end
+                    T = table();
+                    for i = 1:4
+                        x_data = cumu_data{i, 1}';
+                        y_data = cumu_data{i, 2}';
+    
+                        x_data = x_data(2:end-1);
+                        y_data = y_data(2:end-1);
+    
+                        T.([titles{i}]) = x_data;
+                        T.([titles{i} '_prob']) = y_data;
+                    end
+                    fullFilePath = fullfile(cumu_exportPath, cumu_fileName);
+                    writetable(T, fullFilePath)
+                end
+            case 'angle'
+                figure
+                titles = ["Rmax 0deg", "c50 0deg", "n 0deg","s 0deg","Rmax 90deg",...
+                    "c50 90deg", "n 90deg","s 90deg","Rmax 120deg", "c50 120deg", "n 120deg",...
+                    "s 120deg","Rmax 210deg", "c50 210deg", "n 210deg","s 210deg"];
+                
+                for i = 1:16
+                    subplot(4,4,i)
+                    data = temp.(table_col_names(i));
+                    cdfplot(data);
+                    xlabel(titles(i));
+                    title(titles(i));
+                end
+                if export
+                    cumu_data = cell(16, 2); 
+                    cumu_titles = cell(16, 1);
+                    cumu_exportPath = '/mnt/NAS_UserStorage/georgioskeliris/MECP2TUN/exported_cumulative/';
+                    cumu_fileName = input('Please enter a name for the cumulative file: ', 's');
+                    cumu_fileName = strcat(cumu_fileName,'.xlsx');
+                    for i = 1:16
+                        subplot(4,4,i);
+                        h = get(gca, 'Children');
+                        x = get(h, 'XData');
+                        y = get(h, 'YData');
+                        cumu_data{i, 1} = x;
+                        cumu_data{i, 2} = y;
+                        cumu_titles{i} = get(get(gca, 'Title'), 'String');
+                    end
+                    lengths = cellfun(@length, cumu_data);
+
+                    % Find the maximum length
+                    maxLength = max(max(lengths))-2;
+                    T = table();
+                    for i = 1:16
+                        x_data = cumu_data{i, 1}';
+                        y_data = cumu_data{i, 2}';
+    
+                        x_data = x_data(2:end-1);
+                        y_data = y_data(2:end-1);
+    
+                        if length(x_data) < maxLength
+                            x_data((end+1):maxLength) = NaN;
+                        end
+                        if length(y_data) < maxLength
+                            y_data((end+1):maxLength) = NaN;
+                        end
+                        T.([titles{i}]) = x_data;
+                        T.([titles{i} '_prob']) = y_data;
+                    end
+                    fullFilePath = fullfile(cumu_exportPath, cumu_fileName);
+                    writetable(T, fullFilePath)
+                end
+        end  
 end         
 
 
