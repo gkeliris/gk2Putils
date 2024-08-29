@@ -31,8 +31,8 @@ if ~IsOctave
 end
 
 %not sure about these upper and lower bounds
-vlb = [0  0.001 0.5 .8]';
-vub = [10   1  10 2]';
+vlb = [0  0.001 0.5 1]';
+vub = [10   1  20 3]';
 params = fmincon(@(params)FitSuperNakaRushtonFun(params,contrast,response),params0,[],[],[],[],vlb,vub,[],options);
 [f, R2] = FitSuperNakaRushtonFun(params,contrast,response);
 

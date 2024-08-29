@@ -45,7 +45,7 @@ hold on;
 plot(fineContrast*100,predict,'r','LineWidth',2);
 %In case they just want to plot something
 if nargout > 0
-        parameters = [params R2 max(double(sigMeanON))];
+        parameters = [params R2 max(abs(double(sigMeanON)))];
 end
 
 % binangles=round(10000*(sigMeanON-min(sigMeanON))./sum(sigMeanON-min(sigMeanON)));
