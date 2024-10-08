@@ -1,4 +1,4 @@
-function jc_plotParams(ds,sigName,typeplot,angletype,weight, export, numbins)
+function output_table = jc_plotParams(ds,sigName,typeplot,angletype,weight, export, numbins)
 % USAGE: jc_plotParams(ds,sigName,typeplot,angletype,weight,numbins, export)
 %
 % INPUT:
@@ -10,15 +10,17 @@ function jc_plotParams(ds,sigName,typeplot,angletype,weight, export, numbins)
 %   change in fluorescence, 0 is just R2
 %   export:     if you want to export if chose histogram, 1 = yes, 0 = no
 %   numbins:    number of bins if chose histogram, choose 0 if you want to 
-%               choose the edges yourself
-%
+%               choose the edges yourself. The default is 10
+%   output_table: Table which sorts by best angle for each ROI
 %   example: jc_plotparams(ds,'F','histogram','angle',.5,10,1)
 if nargin < 7
-    numbins = 0; 
+    numbins = 10; 
  elseif nargin < 6
      numbins = [];
      export = 0;
- end
+end
+
+
 
 if weight >1 || weight <0
     error("Make ratio a number between 0 and 1") 
@@ -26,27 +28,51 @@ end
 
 ds = jc_selectmanyDS(ds);
 file = '/mnt/NAS_UserStorage/georgioskeliris/MECP2TUN/exported_params/';
-temp = table;
+temp_plot = table;
+temp_outtable = table;
 for i = 1:height(ds)
-    params_file_name = ['DS_',ds.cohort{i},'_',ds.week{i},'_', ds.mouseID{i},'_',...
-        ds.expID{i},'_',ds.session{i},'_',sigName,'_CRF.xlsx'];
-    temp = [temp ; readtable([file params_file_name])];
+    params_file_name = jc_selectDSdate(file,ds(i,:),sigName);
+    
+    temp_plot = [temp_plot ; readtable([file params_file_name])];
+    temp_outtable = [temp_outtable ; readtable([file params_file_name])];
 end
-for j = 1:height(temp)
+for j = 1:height(temp_plot)
     table_col_names_temp = ["Rmax_0deg", "c50_0deg", "n_0deg","s_0deg","Rmax_90deg",...
             "c50_90deg", "n_90deg","s_90deg","Rmax_120deg", "c50_120deg", "n_120deg",...
             "s_120deg","Rmax_210deg", "c50_210deg", "n_210deg","s_210deg"];
-    score = [(1-weight)*temp.R2_0deg(j)+weight*temp.MaxChange_0deg(j)...
-        (1-weight)*temp.R2_90deg(j)+weight*temp.MaxChange_90deg(j)...
-        (1-weight)*temp.R2_120deg(j)+weight*temp.MaxChange_120deg(j)...
-        (1-weight)*temp.R2_210deg(j)+weight*temp.MaxChange_210deg(j)];
+    score = [(1-weight)*temp_plot.R2_0deg(j)+weight*temp_plot.MaxChange_0deg(j)...
+        (1-weight)*temp_plot.R2_90deg(j)+weight*temp_plot.MaxChange_90deg(j)...
+        (1-weight)*temp_plot.R2_120deg(j)+weight*temp_plot.MaxChange_120deg(j)...
+        (1-weight)*temp_plot.R2_210deg(j)+weight*temp_plot.MaxChange_210deg(j)];
     [~, ind] = max(score);
     table_col_names_temp(4*(ind-1)+(1:4)) = [];
     for k = 1:length(table_col_names_temp)
-        temp.(table_col_names_temp{k})(j) = NaN;
+        temp_plot.(table_col_names_temp{k})(j) = NaN;
     end
 end
-
+output_col_names = ["Angle1", "Score1", "Angle2","Score2", "Angle3",...
+    "Score3","Angle4","Score4","Weight"];
+output_var_types = ["double","double","double", "double","double","double","double","double","double"];
+output_table = table('Size',[height(temp_outtable),length(output_col_names)],...
+    'VariableTypes',output_var_types,'VariableNames',output_col_names);
+angles = [0 90 120 210];
+for j = 1:height(temp_outtable)
+    score = [(1-weight)*temp_outtable.R2_0deg(j)+weight*temp_outtable.MaxChange_0deg(j)...
+        (1-weight)*temp_outtable.R2_90deg(j)+weight*temp_outtable.MaxChange_90deg(j)...
+        (1-weight)*temp_outtable.R2_120deg(j)+weight*temp_outtable.MaxChange_120deg(j)...
+        (1-weight)*temp_outtable.R2_210deg(j)+weight*temp_outtable.MaxChange_210deg(j)];
+    
+    [~, ranking] = sort(score, 'descend');
+    
+    for i = 1:4
+        output_table.(output_col_names{2*i-1})(j) = angles(ranking(i));
+        output_table.(output_col_names{2*i})(j) = score(ranking(i));
+    end
+    output_table.Weight(j) = weight;
+end
+if nargout == 0
+    output_table = [];
+end
 table_col_names = ["Rmax_0deg", "c50_0deg", "n_0deg","s_0deg","Rmax_90deg",...
                     "c50_90deg", "n_90deg","s_90deg","Rmax_120deg", "c50_120deg", "n_120deg",...
                     "s_120deg","Rmax_210deg", "c50_210deg", "n_210deg","s_210deg"];
@@ -59,8 +85,8 @@ switch typeplot
                 col_nums = [0 1 2 3];
                 for i = 1:4
                     subplot(2,2,i)
-                    data = [temp.(table_col_names(1+col_nums(i))); temp.(table_col_names(5+col_nums(i)));...
-                        temp.(table_col_names(9+col_nums(i))); temp.(table_col_names(13+col_nums(i)))];
+                    data = [temp_plot.(table_col_names(1+col_nums(i))); temp_plot.(table_col_names(5+col_nums(i)));...
+                        temp_plot.(table_col_names(9+col_nums(i))); temp_plot.(table_col_names(13+col_nums(i)))];
                     boxplot(data);
                     title(titles(i));
                 end
@@ -71,7 +97,7 @@ switch typeplot
                     "s 120deg","Rmax 210deg", "c50 210deg", "n 210deg","s 210deg"];
                 for i = 1:16
                     subplot(4,4,i)
-                    data = temp.(table_col_names(i));
+                    data = temp_plot.(table_col_names(i));
                     boxplot(data);
                     title(titles(i));
                 end
@@ -84,8 +110,8 @@ switch typeplot
                 col_nums = [0 1 2 3];
                 for i = 1:4
                     subplot(2,2,i)
-                    data = [temp.(table_col_names(1+col_nums(i))); temp.(table_col_names(5+col_nums(i)));...
-                        temp.(table_col_names(9+col_nums(i))); temp.(table_col_names(13+col_nums(i)))];
+                    data = [temp_plot.(table_col_names(1+col_nums(i))); temp_plot.(table_col_names(5+col_nums(i)));...
+                        temp_plot.(table_col_names(9+col_nums(i))); temp_plot.(table_col_names(13+col_nums(i)))];
                     if numbins == 0
                         prompt = sprintf('Please Enter the Edges for %s,the min and max are %f and %f: ',...
                             titles(i), min(data), max(data));
@@ -124,7 +150,7 @@ switch typeplot
                     "s 120deg","Rmax 210deg", "c50 210deg", "n 210deg","s 210deg"];
                 for i = 1:16
                     subplot(4,4,i)
-                    data = temp.(table_col_names(i));
+                    data = temp_plot.(table_col_names(i));
                     if numbins == 0
                         prompt = sprintf('Please Enter the Edges for %s,the min and max are %f and %f: ',...
                             titles(i), min(data), max(data));
@@ -166,8 +192,8 @@ switch typeplot
                 col_nums = [0 1 2 3];
                 for i = 1:4
                     subplot(2,2,i)
-                    data = [temp.(table_col_names(1+col_nums(i))); temp.(table_col_names(5+col_nums(i)));...
-                        temp.(table_col_names(9+col_nums(i))); temp.(table_col_names(13+col_nums(i)))];
+                    data = [temp_plot.(table_col_names(1+col_nums(i))); temp_plot.(table_col_names(5+col_nums(i)));...
+                        temp_plot.(table_col_names(9+col_nums(i))); temp_plot.(table_col_names(13+col_nums(i)))];
                     cdfplot(data);
                     title(titles(i));
                     xlabel(titles(i));
@@ -209,7 +235,7 @@ switch typeplot
                 
                 for i = 1:16
                     subplot(4,4,i)
-                    data = temp.(table_col_names(i));
+                    data = temp_plot.(table_col_names(i));
                     cdfplot(data);
                     xlabel(titles(i));
                     title(titles(i));
