@@ -36,6 +36,8 @@ for i = 1:height(ds)
     temp_plot = [temp_plot ; readtable([file params_file_name])];
     temp_outtable = [temp_outtable ; readtable([file params_file_name])];
 end
+
+%This calculates the "best" angle according to the weight
 for j = 1:height(temp_plot)
     table_col_names_temp = ["Rmax_0deg", "c50_0deg", "n_0deg","s_0deg","Rmax_90deg",...
             "c50_90deg", "n_90deg","s_90deg","Rmax_120deg", "c50_120deg", "n_120deg",...
@@ -50,32 +52,35 @@ for j = 1:height(temp_plot)
         temp_plot.(table_col_names_temp{k})(j) = NaN;
     end
 end
-output_col_names = ["Angle1", "Score1", "Angle2","Score2", "Angle3",...
-    "Score3","Angle4","Score4","Weight"];
-output_var_types = ["double","double","double", "double","double","double","double","double","double"];
-output_table = table('Size',[height(temp_outtable),length(output_col_names)],...
-    'VariableTypes',output_var_types,'VariableNames',output_col_names);
-angles = [0 90 120 210];
-for j = 1:height(temp_outtable)
-    score = [(1-weight)*temp_outtable.R2_0deg(j)+weight*temp_outtable.MaxChange_0deg(j)...
-        (1-weight)*temp_outtable.R2_90deg(j)+weight*temp_outtable.MaxChange_90deg(j)...
-        (1-weight)*temp_outtable.R2_120deg(j)+weight*temp_outtable.MaxChange_120deg(j)...
-        (1-weight)*temp_outtable.R2_210deg(j)+weight*temp_outtable.MaxChange_210deg(j)];
+
+%Only create the output table if the user requests it
+if nargout == 1
+    output_col_names = ["Angle1", "Score1", "Angle2","Score2", "Angle3",...
+        "Score3","Angle4","Score4","Weight"];
+    output_var_types = ["double","double","double", "double","double","double","double","double","double"];
+    output_table = table('Size',[height(temp_outtable),length(output_col_names)],...
+        'VariableTypes',output_var_types,'VariableNames',output_col_names);
+    angles = [0 90 120 210];
+    for j = 1:height(temp_outtable)
+        score = [(1-weight)*temp_outtable.R2_0deg(j)+weight*temp_outtable.MaxChange_0deg(j)...
+            (1-weight)*temp_outtable.R2_90deg(j)+weight*temp_outtable.MaxChange_90deg(j)...
+            (1-weight)*temp_outtable.R2_120deg(j)+weight*temp_outtable.MaxChange_120deg(j)...
+            (1-weight)*temp_outtable.R2_210deg(j)+weight*temp_outtable.MaxChange_210deg(j)];
     
-    [~, ranking] = sort(score, 'descend');
+        [~, ranking] = sort(score, 'descend');
     
-    for i = 1:4
-        output_table.(output_col_names{2*i-1})(j) = angles(ranking(i));
-        output_table.(output_col_names{2*i})(j) = score(ranking(i));
+        for i = 1:4
+            output_table.(output_col_names{2*i-1})(j) = angles(ranking(i));
+            output_table.(output_col_names{2*i})(j) = score(ranking(i));
+        end
+        output_table.Weight(j) = weight;
     end
-    output_table.Weight(j) = weight;
-end
-if nargout == 0
-    output_table = [];
 end
 table_col_names = ["Rmax_0deg", "c50_0deg", "n_0deg","s_0deg","Rmax_90deg",...
                     "c50_90deg", "n_90deg","s_90deg","Rmax_120deg", "c50_120deg", "n_120deg",...
                     "s_120deg","Rmax_210deg", "c50_210deg", "n_210deg","s_210deg"];
+                
+%Plot the sepecfic graphic the user requested
 switch typeplot
     case 'boxplot'
         switch angletype

@@ -135,7 +135,7 @@ end
 if export
     try
         pptx.save(fullfile(exportPath,['DS_',ds.cohort{1},'_',ds.week{1},'_',...
-            ds.mouseID{1},'_',ds.session{1},'_',ds.expID{1},'_',sigName,datestr(now, 'dd-mm-yyyy')]));
+            ds.mouseID{1},'_',ds.session{1},'_',ds.expID{1},'_',sigName,'_',datestr(now, 'dd-mm-yyyy')]));
         close all
     catch ME
         display(getReport(ME))
@@ -144,7 +144,7 @@ if export
     %This is to save params table to excel 
     params_exportPath = '/mnt/NAS_UserStorage/georgioskeliris/MECP2TUN/exported_params/';
     params_file_name = ['DS_',ds.cohort{1},'_',ds.week{1},'_', ds.mouseID{1},'_',...
-        ds.expID{1},'_',ds.session{1},'_',sigName,'_CRF',datestr(now,'dd-mm-yyyy'),'.xlsx'];
+        ds.expID{1},'_',ds.session{1},'_',sigName,'_CRF_',datestr(now,'dd-mm-yyyy'),'.xlsx'];
     fullPath = fullfile(params_exportPath, params_file_name);
     writetable(params_table, fullPath);
 end
