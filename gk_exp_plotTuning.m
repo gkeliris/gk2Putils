@@ -71,6 +71,8 @@ if multiGrp
         'double','double','double','double','double','double','double','double'};
      params_table = table('Size', [numel(ROIs) numel(table_col_names)],'VariableTypes',...
          table_col_type,'VariableNames',table_col_names);
+else 
+    params_table=table;
 end  
 n=0;
 for roi=ROIs
@@ -103,7 +105,8 @@ for roi=ROIs
         g=1;
         subplot(1,2,1);
         gk_plot_trials(xpr, roi, g, xpr.stimValues, false)
-        subplot(1,2,2);
+        h = subplot(1,2,2);
+        cla(h)
         gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl)
 
     end
@@ -135,7 +138,7 @@ end
 if export
     try
         pptx.save(fullfile(exportPath,['DS_',ds.cohort{1},'_',ds.week{1},'_',...
-            ds.mouseID{1},'_',ds.session{1},'_',ds.expID{1},'_',sigName,'_',datestr(now, 'dd-mm-yyyy')]));
+            ds.mouseID{1},'_',ds.session{1},'_',ds.expID{1},'_',sigName,'_',datestr(now, 'dd-mm-yyyy_HH:MM:SS')]));
         close all
     catch ME
         display(getReport(ME))
@@ -144,7 +147,7 @@ if export
     %This is to save params table to excel 
     params_exportPath = '/mnt/NAS_UserStorage/georgioskeliris/MECP2TUN/exported_params/';
     params_file_name = ['DS_',ds.cohort{1},'_',ds.week{1},'_', ds.mouseID{1},'_',...
-        ds.expID{1},'_',ds.session{1},'_',sigName,'_CRF_',datestr(now,'dd-mm-yyyy'),'.xlsx'];
+        ds.expID{1},'_',ds.session{1},'_',sigName,'_CRF_',datestr(now,'dd-mm-yyyy_HH:MM:SS'),'.xlsx'];
     fullPath = fullfile(params_exportPath, params_file_name);
     writetable(params_table, fullPath);
 end
