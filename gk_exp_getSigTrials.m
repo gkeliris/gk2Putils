@@ -41,7 +41,11 @@ if (strcmp(ds.cohort,'coh1') || strcmp(ds.cohort,'coh2') ) && ...
             3*ones(560/4,1); 4*ones(560/4,1)];
         stim.Angles=stim.Angles(1:length(stim.IDs));
     end
-    stim.AnglesValues=[0 90 120 210]';
+    if ~isfield(stim,'AnglesValues')
+        stim.AnglesValues=[0 90 120 210]';
+    else
+        stim.AnglesValues=stim.AnglesValues(:);
+    end
         
 end
 

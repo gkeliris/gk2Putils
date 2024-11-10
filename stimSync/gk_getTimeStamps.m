@@ -4,9 +4,15 @@ function [ts, z, roi] = gk_getTimeStamps(tif_file)
 % USAGE: [ts, z, roi] = gk_getTimeStamps(tif_file)
 % 
 % INPUT: tif_file - the (full) path to the .tif file
+%                 - can also be ds (returned by gk_datasetQuery)
 %
 % OUTPUT: ts - a vector with the timestamps
 %         z - 
+if istable(tif_file)
+    ds=gk_selectDS(tif_file);
+    tif_file=fullfile(ds.rawPath,ds.firstTiff);
+end
+
 header = imfinfo(tif_file);
 hdr={header(:).ImageDescription};
 pat='_sec = (?<t>\d+\.\d+\s)';

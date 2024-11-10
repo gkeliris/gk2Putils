@@ -25,14 +25,24 @@ function stimTimes = gk_getStimTimes(h5data)
 % Author: Georgios A. Keliris
 % v.1.0 - 19 Sep 2022
 
-
 try
     PD = h5data.Visual;
 catch
-     PD = h5data.AI5; 
+    PD = h5data.AI5; 
+end
+if reverse
+    
 end
 h1=figure; hold on; plot(h5data.t,PD); xlabel('time [s]');
 pause(0.001);
+reverse = input("Does the signal need reversal y/n [y]? ","s");
+if isempty(answer)
+    reverse='y';
+    PD = max(PD) - PD;
+    close(h1)
+    h1=figure; hold on; plot(h5data.t,PD); xlabel('time [s]');
+end
+
 [tstartend] = input("If necessary enter start/end time in seconds [else press enter]. [tstart tend] = ");
 if isempty(tstartend)
     tstart=h5data.t(1);
@@ -44,14 +54,14 @@ end
 t = h5data.t(h5data.t>=tstart & h5data.t<=tend);
 photodiode= PD(h5data.t>=tstart & h5data.t<=tend);
 
-thr = input('Enter approximate threshold: ');
-close(h1);
-
-h2=figure; hold on;
-histogram(photodiode,'BinMethod','integers','BinLimits',[thr-100 thr+100]); xline(thr,'r--')
-pause(0.001);
+% thr = input('Enter approximate threshold: ');
+% close(h1);
+% 
+% h2=figure; hold on;
+% histogram(photodiode,'BinMethod','integers','BinLimits',[thr-100 thr+100]); xline(thr,'r--')
+% pause(0.001);
 thr = input('Enter threshold: ');
-close(h2);
+%close(h2);
 stimON=zeros(size(t));
 if min(photodiode)<-1000
 stimON(photodiode<thr)=1;
