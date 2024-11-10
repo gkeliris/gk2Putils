@@ -1,5 +1,5 @@
 function output_table = jc_plotParams(ds,sigName,typeplot,angletype,weight, export, numbins)
-% USAGE: jc_plotParams(ds,sigName,typeplot,angletype,weight,numbins, export)
+% USAGE: output_table =  jc_plotParams(ds,sigName,typeplot,angletype,weight,numbins, export)
 %
 % INPUT:
 %   ds :        the output of gk_datasetQuery
@@ -11,7 +11,9 @@ function output_table = jc_plotParams(ds,sigName,typeplot,angletype,weight, expo
 %   export:     if you want to export if chose histogram, 1 = yes, 0 = no
 %   numbins:    number of bins if chose histogram, choose 0 if you want to 
 %               choose the edges yourself. The default is 10
+% OUTPUT:
 %   output_table: Table which sorts by best angle for each ROI
+%
 %   example: jc_plotparams(ds,'F','histogram','angle',.5,10,1)
 if nargin < 7
     numbins = 10; 

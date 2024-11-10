@@ -1,5 +1,14 @@
 function corrected_paras_file_name = jc_selectDSdate(filepath, ds, sigName)
-
+% USAGE: corrected_paras_file_name = jc_selectDSdate(filepath, ds, sigName)
+%
+% INPUT:
+%   filepath: where the paramter files are held
+%   ds :   the output of gk_datasetQuery
+%   sigName: which signal ['F','Fneu','spks']
+%  
+% OUTPUT
+%   corrected_paras_file_name: the name of the file the user wants based on
+%                              the dates available
 fileList = dir(filepath);
 matchingFiles = {};
 
