@@ -92,6 +92,13 @@ switch xpr.expType
         ylabel('\DeltaF/F');
     case 'DR'
         % code for DR tuning
+        ftopt = fitoptions('Method','NonlinearLeastSquares','Lower',[-Inf, 0, 0,  0,0], 'StartPoint',[1,1,1,1,90],'Upper',[Inf,Inf,Inf,Inf,180]);
+        ft2 = fittype('f0+f1*exp(kappa*(cos(deg2rad(x-phi))-1))+f2*exp(kappa*(cos(deg2rad(x-phi+180))-1))');
+        f2 = fit([stimValuesNtrials'],double([sigTrialsON']), ft2, ftopt);
+        xlim([0 360])
+        hold on;plot(f2,'g')
+        xlabel(xlabelStr);
+        ylabel('\DeltaF/F');
     case 'OO'
         % code for OO tuning
     case 'SF'
