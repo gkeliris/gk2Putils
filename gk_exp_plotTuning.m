@@ -78,7 +78,11 @@ n=0;
 for roi=ROIs
     n=n+1;
     if multiGrp
-        angles={'0','90','120','210'};
+        if isfield(xpr,'stimAnglesValues')
+            angles=xpr.stimAnglesValues;
+        else
+            angles=[0; 90; 120; 210];
+        end
         params_table.ROI(n) = xpr.cellIDs(roi);
         for g=1:numel(xpr.grp)
             %subplot(2,4,2*(g-1)+1);
@@ -89,7 +93,7 @@ for roi=ROIs
                 gk_plot_trials(xpr, roi, g, xpr.stimValues, false)
             end
             ylim([-0.5 3])
-            title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', angles{g}]);
+            title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', num2str(angles(g))]);
             legend off
             %subplot(2,4,2*g);
             h = subplot(2,4,4+g);
@@ -97,17 +101,15 @@ for roi=ROIs
             params = gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl);
             params_table{n, table_col_names((g-1)*6 + (2:7))} = params;
             ylim([-0.2 2.8])
-            title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', angles{g}]);
+            title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', num2str(angles(g))]);
         end
-       
-
     else
         g=1;
         subplot(1,2,1);
-        gk_plot_trials(xpr, roi, g, xpr.stimValues, false)
+        gk_plot_trials(xpr, roi, g, xpr.stimValues, false);
         h = subplot(1,2,2);
-        cla(h)
-        gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl)
+        cla(h);
+        params{n} = gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl);
 
     end
     
@@ -145,11 +147,13 @@ if export
         keyboard
     end
     %This is to save params table to excel 
-    params_exportPath = '/mnt/NAS_UserStorage/georgioskeliris/MECP2TUN/exported_params/';
-    params_file_name = ['DS_',ds.cohort{1},'_',ds.week{1},'_', ds.mouseID{1},'_',...
-        ds.expID{1},'_',ds.session{1},'_',sigName,'_CRF_',datestr(now,'dd-mm-yyyy_HH:MM:SS'),'.xlsx'];
-    fullPath = fullfile(params_exportPath, params_file_name);
-    writetable(params_table, fullPath);
+%     params_exportPath = '/mnt/NAS_UserStorage/georgioskeliris/MECP2TUN/exported_params/';
+%     params_file_name = ['DS_',ds.cohort{1},'_',ds.week{1},'_', ds.mouseID{1},'_',...
+%         ds.expID{1},'_',ds.session{1},'_',sigName,'_CRF_',datestr(now,'dd-mm-yyyy_HH:MM:SS'),'.xlsx'];
+%     fullPath = fullfile(params_exportPath, params_file_name);
+%     writetable(params_table, fullPath);
+    save(fullfile(setSesPath(ds),'matlabana',xpr.saveFilename),'params','-append')
+    
 end
 
 % %%%%

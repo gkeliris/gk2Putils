@@ -1,5 +1,5 @@
 function parameters = gk_plot_tuning(xpr, cellNum, grp, stimValues, xlabelStr)
-% USAGE: gk_plot_tuning(xpr, cellNum, grp, stimValues, [xlabelStr])
+% USAGE: parameters = gk_plot_tuning(xpr, cellNum, grp, stimValues, [xlabelStr])
 %
 % Function that plots the tuning function of roi/neuron
 %
@@ -8,6 +8,8 @@ function parameters = gk_plot_tuning(xpr, cellNum, grp, stimValues, xlabelStr)
 %        grp - the group number
 %        stimValues - the type of stimuli stored in xpr.stimValues
 %        xlabelStr - a string to label the x axis (optional)
+%
+% Output: prm - the fitting parameters
 %
 % Author: Georgios A. Keliris
 % v1.0 - 16 Oct 2022
@@ -49,7 +51,7 @@ title(['CELL#: ' num2str(cellNum) ', ROI#: ' num2str(xpr.cellIDs(cellNum))]);
 
 switch xpr.expType
     case 'contrast'
-        [params, f,R2]= FitSuperNakaRushton(stimValues./100,double(sigMeanON)');
+        [params,f,R2]= FitSuperNakaRushton(stimValues./100,double(sigMeanON)');
         fineContrast = linspace(0,1,100);
         predict = ComputeSuperNakaRushton(params,fineContrast);
         hold on;
@@ -81,24 +83,39 @@ switch xpr.expType
 %         %plot(rad2deg(alpha)/2,p*sum(sigMeanON-min(sigMeanON))+min(sigMeanON),'r','LineWidth',1.5);
 %         plot(alpha,p*sum(sigMeanON-min(sigMeanON))+min(sigMeanON),'r','LineWidth',1.5);
         %% Matlab least squares
-        ft = fittype('f0+f1*exp(kappa*(cos(deg2rad(2*(x-phi)))-1))');
-        ftopt = fitoptions('Method','NonlinearLeastSquares','Lower',[-Inf, 0, 0, 0], 'StartPoint',[1,1,1,1]);
-        f = fit(stimValuesNtrials',double(sigTrialsON'), ft, ftopt);
-        ft2 = fittype('f0+f1*exp(kappa*(cos(deg2rad(x-phi))-1))+f1*exp(kappa*(cos(deg2rad(x-phi+180))-1))');
-        f2 = fit([stimValuesNtrials'; stimValuesNtrials'+180],double([sigTrialsON'; sigTrialsON']), ft2, ftopt);
-        xlim([0 180])
-        hold on; plot(f,'r'); plot(f2,'g')
+        prm.cellNum=cellNum; prm.roiNum=xpr.cellIDs(cellNum);
+        prm.ftopt = fitoptions('Method','NonlinearLeastSquares','Robust','on',...
+            'Lower',[-Inf,0,0,0],'Upper',[Inf,Inf,Inf,180],'StartPoint',[0,1,1,90]);
+        %ft = fittype('f0+f1*exp(kappa*(cos(deg2rad(2*(x-phi)))-1))');
+        %f = fit(stimValuesNtrials',double(sigTrialsON'), ft, ftopt);
+        prm.ft = fittype('f0+f1*exp(kappa*(cos(deg2rad(x-phi))-1))+f1*exp(kappa*(cos(deg2rad(x-phi+180))-1))');
+        [prm.f_init, prm.gof_init] = fit([stimValues; stimValues+180],double([sigMeanON'; sigMeanON']), prm.ft, prm.ftopt);
+        prm.ftopt.StartPoint=[prm.f_init.f0, prm.f_init.f1, prm.f_init.kappa, prm.f_init.phi];
+        [prm.f, prm.gof]= fit([stimValuesNtrials'; stimValuesNtrials'+180],double([sigTrialsON'; sigTrialsON']), prm.ft, prm.ftopt);
+        xlim([-5 175])
+        hold on;  plot(prm.f_init,'r'); plot(prm.f,'g');
         xlabel(xlabelStr);
         ylabel('\DeltaF/F');
+        
+        if nargout > 0
+            parameters=prm;
+        end
     case 'DR'
         % code for DR tuning
-        ftopt = fitoptions('Method','NonlinearLeastSquares','Lower',[-Inf, 0, 0,  0,0], 'StartPoint',[1,1,1,1,90],'Upper',[Inf,Inf,Inf,Inf,180]);
-        ft2 = fittype('f0+f1*exp(kappa*(cos(deg2rad(x-phi))-1))+f2*exp(kappa*(cos(deg2rad(x-phi+180))-1))');
-        f2 = fit([stimValuesNtrials'],double([sigTrialsON']), ft2, ftopt);
-        xlim([0 360])
-        hold on;plot(f2,'g')
+        prm.cellNum=cellNum; prm.roiNum=xpr.cellIDs(cellNum);
+        prm.ftopt = fitoptions('Method','NonlinearLeastSquares','Robust','on',...
+            'Lower',[-Inf,0,0,0,0],'Upper',[Inf,Inf,Inf,Inf,180],'StartPoint',[1,1,1,1,90]);
+        prm.ft = fittype('f0+f1*exp(kappa*(cos(deg2rad(x-phi))-1))+f2*exp(kappa*(cos(deg2rad(x-phi+180))-1))');
+        [prm.f_init, prm.gof_init] = fit(stimValues,double(sigMeanON'), prm.ft, prm.ftopt);
+        prm.ftopt.StartPoint=[prm.f_init.f0, prm.f_init.f1, prm.f_init.f2, prm.f_init.kappa, prm.f_init.phi];
+        [prm.f, prm.gof] = fit(stimValuesNtrials',double(sigTrialsON'), prm.ft, prm.ftopt);
+        xlim([-5 355])
+        hold on; plot(prm.f_init,'r--'); plot(prm.f,'g');
         xlabel(xlabelStr);
         ylabel('\DeltaF/F');
+        if nargout > 0
+            parameters=prm;
+        end
     case 'OO'
         % code for OO tuning
     case 'SF'
