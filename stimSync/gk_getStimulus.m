@@ -1,4 +1,13 @@
 function gk_getStimulus(ds)
+% USAGE: gk_getStimulus(ds)
+%
+% this function will create and save the stim.mat file in matlabana folder
+% NOTE: for this to work, image triggers should be in the .h5 file
+%
+% input: ds (output of gk_datasetQuery)
+
+% Author: Georgios A. Keliris
+% November 2024 
 
 ds = gk_selectDS(ds);
 d=dir(fullfile(ds.rawPath,'*.h5'));

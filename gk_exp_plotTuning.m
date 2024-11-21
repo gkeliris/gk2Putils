@@ -1,5 +1,5 @@
-function gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr)
-% USAGE: gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr)
+function gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr,xpr_recalc,plane)
+% USAGE: gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr,[xpr_recalc],plane)
 %
 % INPUT:
 %   ds :        the output of gk_datasetQuery
@@ -8,7 +8,8 @@ function gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr)
 %   t_after:    seconds after stim offset
 %   whichROI:   a) numeric: the ROI number(s) (suite2p ROI index - global)
 %               b) string: 'export' => exports to PPT
-%                          'sortedOnTuned' plots sorted according to p-val
+%                          'sorted_pval' plots sorted according to p-val
+%                          'sorted_
 %   pthr:       p-value to choose as threshold for tuned ROIs
 %
 %   calls -> gk_getTunedROIs, gk_plot_tuning, gk_plot_trials
@@ -16,10 +17,15 @@ function gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr)
 % Author: Georgios A. Keliris
 %
 % See also gk_getTunedROIs, gk_plot_tuning, gk_plot_trials
-
+if nargin < 7
+    xpr_recalc = false;
+end
+if nargin < 8
+    plane = 'combined';
+end
 exportPath = setExportPath;
 ds = gk_selectDS(ds);
-xpr = gk_getTunedROIs(ds,sigName,t_before,t_after,pthr);
+xpr = gk_getTunedROIs(ds,sigName,t_before,t_after,pthr,xpr_recalc,plane);
 
 if size(xpr.onTunedIDs_allGrp,1)==0
     fprintf('No tuned neurons, try with a relaxed statistical pThreshold\n');
@@ -53,27 +59,17 @@ if isnumeric(whichROI)
     end
 else
     switch whichROI
-        case 'sortedOnTuned'
+        case 'sorted_pval'
             ROIs=[xpr.onTunedIDs_allGrp(xpr.sortedOnTunedIDs_allGrp)]';
+        case 'sorted_adjR2'
+            ROIs=[xpr.onTunedIDs_allGrp(xpr.adjR2_cellSort)]';
         case 'export'
             ROIs=[xpr.onTunedIDs_allGrp(xpr.sortedOnTunedIDs_allGrp)]';
             export=true;
 
     end
 end
-if multiGrp
-    table_col_names = {'ROI','Rmax_0deg', 'c50_0deg', 'n_0deg','s_0deg','R2_0deg','MaxChange_0deg',...
-        'Rmax_90deg', 'c50_90deg', 'n_90deg','s_90deg','R2_90deg','MaxChange_90deg','Rmax_120deg',...
-        'c50_120deg', 'n_120deg', 's_120deg','R2_120deg','MaxChange_120deg','Rmax_210deg', 'c50_210deg',...
-        'n_210deg', 's_210deg','R2_210deg','MaxChange_210deg'};
-    table_col_type = {'double','double','double','double','double','double','double','double',...
-        'double','double','double','double','double','double','double','double','double',...
-        'double','double','double','double','double','double','double','double'};
-     params_table = table('Size', [numel(ROIs) numel(table_col_names)],'VariableTypes',...
-         table_col_type,'VariableNames',table_col_names);
-else 
-    params_table=table;
-end  
+
 n=0;
 for roi=ROIs
     n=n+1;
@@ -86,30 +82,34 @@ for roi=ROIs
         params_table.ROI(n) = xpr.cellIDs(roi);
         for g=1:numel(xpr.grp)
             %subplot(2,4,2*(g-1)+1);
-            subplot(2,4,g);
+            ax(g) = subplot(2,numel(xpr.grp),g);
+            cla(ax(g)); ylim auto
             if numel(whichROI)==1
                 gk_plot_trials(xpr, roi, g, xpr.stimValues, true)
             else
                 gk_plot_trials(xpr, roi, g, xpr.stimValues, false)
             end
-            ylim([-0.5 3])
+            %ylim([-0.5 4.8])
             title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', num2str(angles(g))]);
             legend off
             %subplot(2,4,2*g);
-            h = subplot(2,4,4+g);
-            cla(h)
-            params = gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl);
-            params_table{n, table_col_names((g-1)*6 + (2:7))} = params;
-            ylim([-0.2 2.8])
+            ax(numel(xpr.grp)+g) = subplot(2,numel(xpr.grp),numel(xpr.grp)+g);
+            cla(ax(numel(xpr.grp)+g)); ylim auto
+            gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl);
+            %ylim([-0.2 4.8])
             title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', num2str(angles(g))]);
         end
+        [~,n]=max(cellfun(@(x) x(2),ylim(ax(1:numel(xpr.grp)))));
+        set(ax(1:numel(xpr.grp)),'YLIM',ylim(ax(n)));
+        [~,n]=max(cellfun(@(x) x(2),ylim(ax(numel(xpr.grp)+1:2*numel(xpr.grp)))));
+        set(ax(numel(xpr.grp)+1:2*numel(xpr.grp)),'YLIM',ylim(ax(numel(xpr.grp)+n)));
     else
         g=1;
         subplot(1,2,1);
         gk_plot_trials(xpr, roi, g, xpr.stimValues, false);
         h = subplot(1,2,2);
         cla(h);
-        params{n} = gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl);
+        gk_plot_tuning(xpr, roi, g, xpr.stimValues, xlabl);
 
     end
     
@@ -152,7 +152,8 @@ if export
 %         ds.expID{1},'_',ds.session{1},'_',sigName,'_CRF_',datestr(now,'dd-mm-yyyy_HH:MM:SS'),'.xlsx'];
 %     fullPath = fullfile(params_exportPath, params_file_name);
 %     writetable(params_table, fullPath);
-    save(fullfile(setSesPath(ds),'matlabana',xpr.saveFilename),'params','-append')
+
+%    save(fullfile(setSesPath(ds),'matlabana',xpr.saveFilename),'params','-append')
     
 end
 

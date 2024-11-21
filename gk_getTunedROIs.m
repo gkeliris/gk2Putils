@@ -1,5 +1,5 @@
-function xpr = gk_getTunedROIs(ds,sigName,before,after,p_thr,plane)
-% USAGE: xpr = gk_getTunedROIs(ds,sigName,before[s],after[s],p_thr,[plane])
+function xpr = gk_getTunedROIs(ds,sigName,before,after,p_thr,xpr_recalc,plane)
+% USAGE: xpr = gk_getTunedROIs(ds,sigName,before[s],after[s],p_thr,[force_save],[plane])
 %
 % Uses anova1 on the responses and if significant based on p_thr assigns
 % the ROI as tuned
@@ -17,12 +17,15 @@ function xpr = gk_getTunedROIs(ds,sigName,before,after,p_thr,plane)
 % See also gk_exp_getSigTrials, gk_getCellTrials
 ds = gk_selectDS(ds);
 if nargin < 6
+    xpr_recalc=false;
+end
+if nargin < 7
     plane = 'combined';
 end
 saveFilename=['xpr_', sigName, '_bef:',num2str(before), '_aft:', num2str(after),...
     '_pthr:', sprintf('%.1e',p_thr), '_', plane, '.mat'];
 
-if isfile(fullfile(setSesPath(ds), 'matlabana',saveFilename))
+if isfile(fullfile(setSesPath(ds), 'matlabana',saveFilename)) && ~xpr_recalc
     load(fullfile(setSesPath(ds), 'matlabana',saveFilename));
     xpr.saveFilename=saveFilename;
 else

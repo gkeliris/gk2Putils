@@ -1,5 +1,5 @@
-function parameters = gk_plot_tuning(xpr, cellNum, grp, stimValues, xlabelStr)
-% USAGE: parameters = gk_plot_tuning(xpr, cellNum, grp, stimValues, [xlabelStr])
+function parameters = gk_plot_tuning(xpr, cellNum, grp, stimValues, xlabelStr,force_recalc,fitChoice)
+% USAGE: [parameters] = gk_plot_tuning(xpr, cellNum, grp, stimValues, [xlabelStr],[force_recalc],[fit_type])
 %
 % Function that plots the tuning function of roi/neuron
 %
@@ -8,114 +8,73 @@ function parameters = gk_plot_tuning(xpr, cellNum, grp, stimValues, xlabelStr)
 %        grp - the group number
 %        stimValues - the type of stimuli stored in xpr.stimValues
 %        xlabelStr - a string to label the x axis (optional)
+%        force_recalc - recalculate fit even if it is already in xpr
 %
-% Output: prm - the fitting parameters
+%        fitChoice - 'mean': fits the means for each stimValue [default]
+%                    'wgt' : fit the mean's weighted by 1/std^2
+%                    'all' : fit all the trials
 %
-% Author: Georgios A. Keliris
-% v1.0 - 16 Oct 2022
-% v2.0 - 19 Aug 2024
+% Output: parameters - the fitting parameters [optional]
 %
 % See also FitNakaRushton, ComputeNakaRushton
 
-if nargin == 4
-    xlabelStr = 'stimulus parameter';
+% Author: Georgios A. Keliris
+% v1.0 - 16 Oct 2022
+% v2.0 - 19 Aug 2024
+% v3.0 - 15 Nov 2024
+
+if nargin < 7; fitChoice = 'mean'; end
+if nargin < 6; force_recalc = false; end
+if nargin < 5; xlabelStr = 'stimulus parameter'; end
+tunedCellID = find(xpr.onTunedIDs_allGrp==cellNum);
+%% READ THE DATA
+stim.Values=stimValues';
+sig.Mean = cellfun(@(x) squeeze(mean(x(cellNum,:),2)),xpr.sorted_trials_ONresp,'UniformOutput',false);
+sig.Mean = [sig.Mean{:,grp}];
+sig.Trials = cellfun(@(x) x(cellNum,:),xpr.sorted_trials_ONresp,'UniformOutput',false);
+sig.Std = cellfun(@(x) squeeze(std(x(cellNum,:),0,2)),xpr.sorted_trials_ONresp,'UniformOutput',false);
+sig.Std = [sig.Std{:,grp}];
+sig.Sem = cellfun(@(x) squeeze(std(x(cellNum,:),0,2)./sqrt(size(x,2))),xpr.sorted_trials_ONresp,'UniformOutput',false);
+sig.Sem = [sig.Sem{:,grp}];
+Ntrials = cellfun(@(x) length(x),sig.Trials,'UniformOutput',false);
+Ntrials = [Ntrials{:,grp}]; sig.Trials = [sig.Trials{:,grp}];
+stim.ValuesNtrials = [];
+for i=1:length(stim.Values)
+    stim.ValuesNtrials = [stim.ValuesNtrials repmat(stim.Values(i),1,Ntrials(i))];
 end
 
-%Ntrials = size(sig.trials_ONresp,2); 
-%sigMeanON = squeeze(mean(sig.trials_ONresp(roiNum,:,:),2));
-sigMeanON = cellfun(@(x) squeeze(mean(x(cellNum,:),2)),xpr.sorted_trials_ONresp,'UniformOutput',false);
-sigMeanON = [sigMeanON{:,grp}];
-sigTrialsON = cellfun(@(x) x(cellNum,:),xpr.sorted_trials_ONresp,'UniformOutput',false);
-Ntrials = cellfun(@(x) length(x),sigTrialsON,'UniformOutput',false);
-Ntrials = [Ntrials{:,grp}];
-stimValuesNtrials = [];
-for i=1:length(stimValues)
-    stimValuesNtrials = [stimValuesNtrials repmat(stimValues(i),1,Ntrials(i))];
+%% PLOT THE DATA POINTS
+if strcmp(fitChoice,'all')
+    plot(stim.ValuesNtrials,sig.Trials','o','MarkerEdgeColor',[1 1 1],'MarkerFaceColor',[0.75 0.75 0.75]);
 end
-sigTrialsON = [sigTrialsON{:,grp}];
-%sigSemON = squeeze(std(sig.trials_ONresp(roiNum,:,:),0,2)./sqrt(Ntrials));
-sigSemON = cellfun(@(x) squeeze(std(x(cellNum,:),0,2)./sqrt(size(x,2))),xpr.sorted_trials_ONresp,'UniformOutput',false);
-sigSemON = [sigSemON{:,grp}];
-%sigMeanOFF= squeeze(mean(sig.trials_OFFresp(roiNum,:,:),2));
-%sigSemOFF = squeeze(std(sig.trials_OFFresp(roiNum,:,:),0,2)./sqrt(Ntrials));
-
-errorbar(stimValues,sigMeanON,sigSemON,'ko','MarkerFaceColor',[0 0 0]);
-yline([0],'--');
+yline([0],'--'); hold on;
+errorbar(stim.Values,sig.Mean,sig.Sem,'ko','MarkerFaceColor',[0 0 0]);
 xlabel(xlabelStr);
-%xlim padded
-%ylim padded
 ylabel('\DeltaF/F');
-%title(['ROI#: ' num2str(cellNum)]);
 title(['CELL#: ' num2str(cellNum) ', ROI#: ' num2str(xpr.cellIDs(cellNum))]);
-
-
+%% GET THE MODEL FIT PARAMETERS FOR DIFFERENT EXP TYPES
 switch xpr.expType
     case 'contrast'
-        [params,f,R2]= FitSuperNakaRushton(stimValues./100,double(sigMeanON)');
-        fineContrast = linspace(0,1,100);
-        predict = ComputeSuperNakaRushton(params,fineContrast);
-        hold on;
-        plot(fineContrast*100,predict,'r','LineWidth',2);
-        %In case they just want to plot something
-        if nargout > 0
-            parameters = [params R2 max(abs(double(sigMeanON)))];
+        if ~isfield(xpr,'tuning_params') || force_recalc     %calculate fit
+            prm=fit_contrast(stim,sig,fitChoice);
+        else
+            prm=xpr.tuning_params{tunedCellID, grp};
         end
+        xlim([-1 101]);
     case 'OR'
-%         binangles=round(10000*(sigMeanON-min(sigMeanON))./sum(sigMeanON-min(sigMeanON)));
-%         samples=[];
-%         for s=1:numel(binangles)
-%             samples=[samples; repmat(deg2rad(stimValues(s))-pi,binangles(s),1)];
-%         end
-%         nComponents = 2;
-%         fittedVmm = fitmvmdist(samples, nComponents, ...
-%             'MaxIter', 250); % Set maximum number of EM iterations to 250
-%         
-%         norm = sum(fittedVmm.pdf(unique(samples)));
-%         xangles = linspace(-pi, pi, 1000)';
-%         hold on;
-%         plot(rad2deg(xangles)+180,norm*fittedVmm.pdf(xangles)+min(sigMeanON),'r','LineWidth',1.5);
-%         
-
-        %% This is a quick and dirty way to fit the orientation tuning
-%         [thetahat kappa] = circ_vmpar(deg2rad(stimValues)*2,sigMeanON'-min(sigMeanON));
-%         [p alpha]=circ_vmpdf([],thetahat,kappa);
-%         hold on;
-%         %plot(rad2deg(alpha)/2,p*sum(sigMeanON-min(sigMeanON))+min(sigMeanON),'r','LineWidth',1.5);
-%         plot(alpha,p*sum(sigMeanON-min(sigMeanON))+min(sigMeanON),'r','LineWidth',1.5);
-        %% Matlab least squares
-        prm.cellNum=cellNum; prm.roiNum=xpr.cellIDs(cellNum);
-        prm.ftopt = fitoptions('Method','NonlinearLeastSquares','Robust','on',...
-            'Lower',[-Inf,0,0,0],'Upper',[Inf,Inf,Inf,180],'StartPoint',[0,1,1,90]);
-        %ft = fittype('f0+f1*exp(kappa*(cos(deg2rad(2*(x-phi)))-1))');
-        %f = fit(stimValuesNtrials',double(sigTrialsON'), ft, ftopt);
-        prm.ft = fittype('f0+f1*exp(kappa*(cos(deg2rad(x-phi))-1))+f1*exp(kappa*(cos(deg2rad(x-phi+180))-1))');
-        [prm.f_init, prm.gof_init] = fit([stimValues; stimValues+180],double([sigMeanON'; sigMeanON']), prm.ft, prm.ftopt);
-        prm.ftopt.StartPoint=[prm.f_init.f0, prm.f_init.f1, prm.f_init.kappa, prm.f_init.phi];
-        [prm.f, prm.gof]= fit([stimValuesNtrials'; stimValuesNtrials'+180],double([sigTrialsON'; sigTrialsON']), prm.ft, prm.ftopt);
-        xlim([-5 175])
-        hold on;  plot(prm.f_init,'r'); plot(prm.f,'g');
-        xlabel(xlabelStr);
-        ylabel('\DeltaF/F');
-        
-        if nargout > 0
-            parameters=prm;
+        if ~isfield(xpr,'tuning_params')  || force_recalc    %calculate fit
+            prm=fit_OR(stim,sig,fitChoice);
+        else
+            prm=xpr.tuning_params{tunedCellID};
         end
+        xlim([-5 175]);
     case 'DR'
-        % code for DR tuning
-        prm.cellNum=cellNum; prm.roiNum=xpr.cellIDs(cellNum);
-        prm.ftopt = fitoptions('Method','NonlinearLeastSquares','Robust','on',...
-            'Lower',[-Inf,0,0,0,0],'Upper',[Inf,Inf,Inf,Inf,180],'StartPoint',[1,1,1,1,90]);
-        prm.ft = fittype('f0+f1*exp(kappa*(cos(deg2rad(x-phi))-1))+f2*exp(kappa*(cos(deg2rad(x-phi+180))-1))');
-        [prm.f_init, prm.gof_init] = fit(stimValues,double(sigMeanON'), prm.ft, prm.ftopt);
-        prm.ftopt.StartPoint=[prm.f_init.f0, prm.f_init.f1, prm.f_init.f2, prm.f_init.kappa, prm.f_init.phi];
-        [prm.f, prm.gof] = fit(stimValuesNtrials',double(sigTrialsON'), prm.ft, prm.ftopt);
-        xlim([-5 355])
-        hold on; plot(prm.f_init,'r--'); plot(prm.f,'g');
-        xlabel(xlabelStr);
-        ylabel('\DeltaF/F');
-        if nargout > 0
-            parameters=prm;
+        if ~isfield(xpr,'tuning_params')  || force_recalc    %calculate fit
+            prm=fit_DR(stim,sig,fitChoice);
+        else
+            prm=xpr.tuning_params{tunedCellID};
         end
+        xlim([-5 355]);
     case 'OO'
         % code for OO tuning
     case 'SF'
@@ -125,11 +84,13 @@ switch xpr.expType
     otherwise
         error('Unknown experiment type');
 end
-
-
-
-
-
-
+%% PLOT
+plot(prm.f,'r'); ax=gca; ax.Children(1).LineWidth=2; legend off;
+xlabel(xlabelStr);
+ylabel('\DeltaF/F');
+%% OUTPUT (if requested)
+if nargout > 0
+    parameters=prm;
+end
 
 return

@@ -11,13 +11,22 @@ function frameTimes = gk_getFrameTimes(h5data, nZplanes)
 %
 % Author: Georgios A. Keliris
 % v.1.0 2024
-
+ChannelNames=h5data.chNames;
+Num=[1:numel(ChannelNames)]';
+T=table(Num,ChannelNames)
+PD_channel=input("Enter the image trigger channel: ");
+try
+    PD = eval(['h5data.' T.ChannelNames{PD_channel}]);
+catch
+    %PD = h5data.AI5;
+    keyboard
+end
 if nargin<2
     nZplanes=input('Enter number of z-planes:');
 end
 
-PD=(median(h5data.AI5)-h5data.AI5)/median(h5data.AI5);
-[~, frameTimes]=findpeaks(single(PD),h5data.t);
+PD=(median(PD)-PD)/median(PD);
+[~, frameTimes]=findpeaks(single(PD),h5data.time);
 frameTimes=frameTimes(1:nZplanes:end)';
 
 return

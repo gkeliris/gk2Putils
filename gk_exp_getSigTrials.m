@@ -50,7 +50,7 @@ if (strcmp(ds.cohort,'coh1') || strcmp(ds.cohort,'coh2') ) && ...
 end
 
 xpr = gk_getSigAllTrials(sig,stim,t_before_sec, t_after_sec);
-
+xpr.ds=ds;
 xpr.cellIDs=find(iscell(:,1));
 xpr.cohort=ds.cohort;
 xpr.timepoint=ds.week;

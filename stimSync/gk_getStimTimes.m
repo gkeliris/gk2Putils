@@ -25,43 +25,57 @@ function stimTimes = gk_getStimTimes(h5data)
 % Author: Georgios A. Keliris
 % v.1.0 - 19 Sep 2022
 
+ChannelNames=h5data.chNames;
+Num=[1:numel(ChannelNames)]';
+T=table(Num,ChannelNames)
+PD_channel=input("Enter the number of the photodiode channel: ");
 try
-    PD = h5data.Visual;
+    PD = eval(['h5data.' T.ChannelNames{PD_channel}]);
 catch
-    PD = h5data.AI5; 
+    %PD = h5data.AI5;
+    keyboard
 end
-if reverse
-    
-end
-h1=figure; hold on; plot(h5data.t,PD); xlabel('time [s]');
+% if reverse
+%     
+% end
+h1=figure; hold on; plot(h5data.time,PD); xlabel('time [s]');
 pause(0.001);
-reverse = input("Does the signal need reversal y/n [y]? ","s");
-if isempty(answer)
-    reverse='y';
-    PD = max(PD) - PD;
-    close(h1)
-    h1=figure; hold on; plot(h5data.t,PD); xlabel('time [s]');
+getreversal=true;
+while getreversal
+    reverse = input("Does the signal need reversal y/n [n]? ","s");
+    if isempty(reverse) || reverse=='n'
+        getreversal=false;
+    elseif reverse=='y'
+        getreversal=false;
+        PD = max(PD) - PD;
+        close(h1)
+        h1=figure; hold on; plot(h5data.time,PD); xlabel('time [s]');
+    else
+        fprintf('please enter y or n\n')
+    end
 end
 
 [tstartend] = input("If necessary enter start/end time in seconds [else press enter]. [tstart tend] = ");
 if isempty(tstartend)
-    tstart=h5data.t(1);
-    tend=h5data.t(end);
+    tstart=h5data.time(1);
+    tend=h5data.time(end);
 else
     tstart=tstartend(1); 
     tend=tstartend(2);
 end
-t = h5data.t(h5data.t>=tstart & h5data.t<=tend);
-photodiode= PD(h5data.t>=tstart & h5data.t<=tend);
+t = h5data.time(h5data.time>=tstart & h5data.time<=tend);
+photodiode= PD(h5data.time>=tstart & h5data.time<=tend);
+
 
 % thr = input('Enter approximate threshold: ');
-% close(h1);
+% close(h1)
 % 
 % h2=figure; hold on;
 % histogram(photodiode,'BinMethod','integers','BinLimits',[thr-100 thr+100]); xline(thr,'r--')
 % pause(0.001);
 thr = input('Enter threshold: ');
-%close(h2);
+%close(h2)
+close(h1);
 stimON=zeros(size(t));
 if min(photodiode)<-1000
 stimON(photodiode<thr)=1;
@@ -97,7 +111,7 @@ stimTimes.offsets = t(diff(s)==-1);
 stimTimes.t=t;
 stimTimes.stim_continuous=s;
 
-h1=figure; hold on; plot(h5data.t,PD); xlabel('time [s]');
+h1=figure; hold on; plot(h5data.time,PD); xlabel('time [s]');
 
 plot(t,s*150+thr,'m','LineWidth',1.5);
 ylim([thr-100 thr+180])

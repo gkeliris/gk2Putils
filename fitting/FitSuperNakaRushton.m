@@ -54,9 +54,16 @@ yMean=sum(prediction)/nPoints;
 error = prediction-response;
 tot = prediction-yMean;
 f = 10000*sqrt(sum(error.^2)/nPoints);
-RSS=sum(error.^2);
-TSS=sum(tot.^2);
-R2 = max(0,1-RSS/TSS);
+if nargout == 2
+    [~, ia, ib] = unique(contrast);
+    for i=1:numel(ia); mean_response(i)=mean(response(ib==i)); end
+    error_ = prediction(ia)-mean_response';
+    yMean_ = mean(prediction(ia));
+    tot_ = prediction(ia)-yMean_;
+    RSS=sum(error_.^2);
+    TSS=sum(tot_.^2);
+    R2 = max(0,1-RSS/TSS);
+end
 
 % Handle bizarre parameter values.
 if (isnan(f))

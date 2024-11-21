@@ -1,9 +1,9 @@
-function res = gk_get_peakRespFF(xpr)
+function xpr = gk_get_peakRespFF(xpr)
 
 sigMean = cellfun(@(x) squeeze(mean(x(:,:,:),3)'),xpr.sorted_trials_dF_F,...
                                                 'UniformOutput',false);
 ti0=find(xpr.t==0);
-Fs=1/diff(xpr.t(1:2))
+Fs=1/diff(xpr.t(1:2));
 
 % estimate the standard deviation of the baseline by concatenating all the
 % points from the baseline window
@@ -53,21 +53,27 @@ for c=1:numel(xpr.visRespCells) %  1:numel(xpr.cellIDs)
      visRespCells.peak_ind(c)=tiPeak_ind(ceil(nanmedian(visRespCells.loc_pref(c,:)')));
      trials = cellfun(@(x) squeeze(mean(x(xpr.visRespCells(c),visRespCells.peak_ind(c)-1:visRespCells.peak_ind(c)+1,:),2)),...
          xpr.sorted_trials_dF_F,'UniformOutput',false);
-     visRespCells.responses(c,:,:)=cell2mat(trials(:,visRespCells.pref(c))');
-     CRF.sigMean(c,:)=squeeze(mean(visRespCells.responses(c,:,:),2));
-     CRF.sigSem(c,:)=squeeze(std(visRespCells.responses(c,:,:),0,2)./...
-         sqrt(size(visRespCells.responses(c,:,:),2)));
-     [~,maxInd]=max(CRF.sigMean(c,:),[],2);
-     if maxInd<=7
-         CRF.lowCon(c,1)=1;
-     else
-         CRF.lowCon(c,1)=0;
-     end
+     xpr.peakPref(c)= visRespCells.pref(c);
+     xpr.peakResp_trials{c} = trials;
+     xpr.peakResp_mean(c,:,:) = cellfun(@(x) mean(x), trials);
+     xpr.peakResp_sem(c,:,:) = cellfun(@(x) std(x)/sqrt(numel(x)), trials);
+     
+     
+%      visRespCells.responses(c,:,:)=cell2mat(trials(:,visRespCells.pref(c))');
+%      CRF.sigMean(c,:)=squeeze(mean(visRespCells.responses(c,:,:),2));
+%      CRF.sigSem(c,:)=squeeze(std(visRespCells.responses(c,:,:),0,2)./...
+%          sqrt(size(visRespCells.responses(c,:,:),2)));
+%      [~,maxInd]=max(CRF.sigMean(c,:),[],2);
+%      if maxInd<=7
+%          CRF.lowCon(c,1)=1;
+%      else
+%          CRF.lowCon(c,1)=0;
+%      end
 end
-CRF.lowSum=sum(CRF.lowCon);
-CRF.lowPerc=CRF.lowSum/numel(CRF.lowCon)*100;
-CRF.roiNums=xpr.visRespCells;
-CRF.stimValues=xpr.stimValues;
+% CRF.lowSum=sum(CRF.lowCon);
+% CRF.lowPerc=CRF.lowSum/numel(CRF.lowCon)*100;
+% CRF.roiNums=xpr.visRespCells;
+% CRF.stimValues=xpr.stimValues;
 delete(h)
 
 

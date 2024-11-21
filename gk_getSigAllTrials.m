@@ -11,6 +11,12 @@ z=1; %for multiplane ROIs that could have different timing, we use the 1st
 t_before_frames = round(t_before_sec*stim.Times.frame_fs(z));
 t_after_frames = ceil(t_after_sec*stim.Times.frame_fs(z));
 t_dur=stim.Times.median_frame_duration(z);
+if t_dur/stim.Times.frame_fs < 2
+    t_ext_sec = 1; % extend the duration for 1 sec (for STIMON period)
+    t_ext = ceil(t_ext_sec*stim.Times.frame_fs);
+else
+    t_ext = 0;
+end
 % Calculate the total trial duration
 trial_dur=t_before_frames + t_dur + t_after_frames;
 
@@ -19,6 +25,9 @@ sig.t=[-t_before_frames:(t_dur + t_after_frames -1)]./stim.Times.frame_fs(z);
 sig.stim_dur=median(stim.Times.offsets-stim.Times.onsets);
 sig.stimIDs=stim.IDs;
 if isfield(stim,'Angles')
+    if ~isfield(stim,'AnglesValues')
+        stim.AnglesValues=[0;90;120;210];
+    end
     sig.stimAngles=stim.Angles;
     sig.stimAnglesValues=stim.AnglesValues;
     grps=unique(stim.Angles);
@@ -41,11 +50,12 @@ end
 temp=sigMat(:,fromTo);
 sig.trials= reshape(temp,[size(temp,1), trial_dur, numel(i_from)]);
 sig.trials_dF_F = (sig.trials ./ repmat(mean(sig.trials(:,t_before_frames-3:t_before_frames+1,:),2),[1,trial_dur,1])) - 1 ;
-sig.trials_ONresp = squeeze(mean(sig.trials_dF_F(:,t_before_frames+3:t_before_frames+t_dur,:),2));
+sig.trials_ONresp = squeeze(mean(sig.trials_dF_F(:,t_before_frames+3:t_before_frames+t_dur+t_ext,:),2));
 %sig.trials_OFFresp = squeeze(mean(sig.trials_dF_F(:,t_before_frames+t_dur+3:t_before_frames+t_dur+t_after_frames-3,:),2));
 
 % sort trials to groups and stimuli (use cells to account for unequal
 % number of trials)
+
 for g=1:nGrps
     for s=1:numel(sig.stimValues)
         if nGrps>1
