@@ -7,6 +7,12 @@ sig.expType=stim.expType;
 
 z=1; %for multiplane ROIs that could have different timing, we use the 1st
 
+% Calculate F0
+baseline_dur=20; % seconds
+baseline_frames=round(baseline_dur*stim.Times.frame_fs(z));
+F0_index=stim.Times.frame_onsets(z,1)-baseline_frames:stim.Times.frame_onsets(z,1)-1;
+F0_bsl=median(sigMat(:,F0_index),2);
+
 % Calculate the number of frames before, during, and after stimulus onset
 t_before_frames = round(t_before_sec*stim.Times.frame_fs(z));
 t_after_frames = ceil(t_after_sec*stim.Times.frame_fs(z));
@@ -47,10 +53,13 @@ fromTo=[];
 for tr=1:numel(i_from)
     fromTo = [fromTo i_from(tr):i_to(tr)];
 end
+
 temp=sigMat(:,fromTo);
 sig.trials= reshape(temp,[size(temp,1), trial_dur, numel(i_from)]);
-sig.trials_dF_F = (sig.trials ./ repmat(mean(sig.trials(:,t_before_frames-3:t_before_frames+1,:),2),[1,trial_dur,1])) - 1 ;
+%sig.trials_dF_F = (sig.trials ./ repmat(mean(sig.trials(:,t_before_frames-3:t_before_frames+1,:),2),[1,trial_dur,1])) - 1 ;
+sig.trials_dF_F = (sig.trials ./ repmat(F0_bsl,1,size(sig.trials,2),size(sig.trials,3))) - 1 ;
 sig.trials_ONresp = squeeze(mean(sig.trials_dF_F(:,t_before_frames+3:t_before_frames+t_dur+t_ext,:),2));
+%sig.trials_ONresp = squeeze(mean(sig.trials(:,t_before_frames+3:t_before_frames+t_dur+t_ext,:),2));
 %sig.trials_OFFresp = squeeze(mean(sig.trials_dF_F(:,t_before_frames+t_dur+3:t_before_frames+t_dur+t_after_frames-3,:),2));
 
 % sort trials to groups and stimuli (use cells to account for unequal

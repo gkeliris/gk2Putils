@@ -29,8 +29,8 @@ if isfile(fullfile(setSesPath(ds), 'matlabana',saveFilename)) && ~xpr_recalc
     load(fullfile(setSesPath(ds), 'matlabana',saveFilename));
     xpr.saveFilename=saveFilename;
 else
-    
-    xpr = gk_exp_getSigTrials(ds,sigName,before,after,plane);
+    Fneu_factor=0.7;
+    xpr = gk_exp_getSigTrials(ds,sigName,before,after,plane,Fneu_factor);
     
     if isfield(xpr,'stimAngles')
         nGrps=numel(unique(xpr.stimAngles));

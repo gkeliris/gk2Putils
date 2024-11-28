@@ -14,7 +14,7 @@ function xpr = gk_getTunedROIsDirect(sig,iscell,stim,before,after,p_thr)
 % Author: Georgios A. Keliris
 
 sig = sig(logical(iscell(:,1)),:);
-xpr = gk_getSigAllTrials(sig,stim,2,3);
+xpr = gk_getSigAllTrials(sig,stim,before,after);
 xpr.cellIDs=find(iscell(:,1));
 
 if isfield(xpr,'stimAngles')
