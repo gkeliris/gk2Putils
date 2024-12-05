@@ -1,5 +1,5 @@
-function xpr = gk_getTunedROIs(ds,sigName,before,after,p_thr,xpr_recalc,plane)
-% USAGE: xpr = gk_getTunedROIs(ds,sigName,before[s],after[s],p_thr,[force_save],[plane])
+function xpr = gk_getTunedROIs(ds,sigName,before,after,p_thr,Fneu_factor,xpr_recalc,plane)
+% USAGE: xpr = gk_getTunedROIs(ds,sigName,before[s],after[s],p_thr,[Fneu_factor],[force_save],[plane])
 %
 % Uses anova1 on the responses and if significant based on p_thr assigns
 % the ROI as tuned
@@ -10,6 +10,7 @@ function xpr = gk_getTunedROIs(ds,sigName,before,after,p_thr,xpr_recalc,plane)
 %   before:     seconds before stim onset
 %   after:      seconds after stim offset
 %   pthr:       p-value to select ROIs as tuned
+%   Fneu_factor: the factor to multiply Fneu to subtract from F
 %   [plane]:    'combined' or 'plane0','plane1',... or 0,1,...
 %
 % Author: Georgios A. Keliris
@@ -17,19 +18,21 @@ function xpr = gk_getTunedROIs(ds,sigName,before,after,p_thr,xpr_recalc,plane)
 % See also gk_exp_getSigTrials, gk_getCellTrials
 ds = gk_selectDS(ds);
 if nargin < 6
-    xpr_recalc=false;
+    Fneu_factor = 0;
 end
 if nargin < 7
+    xpr_recalc=false;
+end
+if nargin < 8
     plane = 'combined';
 end
 saveFilename=['xpr_', sigName, '_bef:',num2str(before), '_aft:', num2str(after),...
-    '_pthr:', sprintf('%.1e',p_thr), '_', plane, '.mat'];
+    '_pthr:', sprintf('%.1e',p_thr), '_', plane, '_', num2str(Fneu_factor), '.mat'];
 
 if isfile(fullfile(setSesPath(ds), 'matlabana',saveFilename)) && ~xpr_recalc
     load(fullfile(setSesPath(ds), 'matlabana',saveFilename));
     xpr.saveFilename=saveFilename;
 else
-    Fneu_factor=0.7;
     xpr = gk_exp_getSigTrials(ds,sigName,before,after,plane,Fneu_factor);
     
     if isfield(xpr,'stimAngles')
@@ -56,6 +59,7 @@ else
     xpr.pThr=p_thr;
     xpr.isOnTuned_allGrp=xpr.pONmin<p_thr;
     xpr.onTunedIDs_allGrp = find(xpr.isOnTuned_allGrp);
+    fprintf('This dataset has:%d/%d tuned neurons\n',numel(xpr.onTunedIDs_allGrp),numel(xpr.pONmin));
     [~, xpr.sortedOnTunedIDs_allGrp]= sort(xpr.pONmin(xpr.onTunedIDs_allGrp));
     xpr.tunedGlobalIDs=xpr.cellIDs(xpr.onTunedIDs_allGrp(xpr.sortedOnTunedIDs_allGrp));
     xpr.saveFilename=saveFilename;

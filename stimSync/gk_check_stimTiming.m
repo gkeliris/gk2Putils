@@ -17,16 +17,18 @@ else
     dT=0;
     tCorr=0;
 end
-
+if ~isfield(h5,'t')
+    h5.t=h5.time;
+end
 answer='y';
 while strcmp(answer,'y')
 
 h = figure; hold on;
 if nargin>=3
     try
-        plot(h5.t+tCorr+dT,h5.AI4./25,'y');
+        plot(h5.t+tCorr+dT,h5.AI4./25,'c');
     catch
-        plot(h5.t+tCorr+dT,h5.Visual./25,'y');
+        plot(h5.t+tCorr+dT,h5.Visual./25,'c');
     end
     xline(dT,'g')
 end

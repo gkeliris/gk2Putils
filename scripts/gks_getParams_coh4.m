@@ -1,5 +1,5 @@
-w22ds = gk_datasetQuery('week','w22','expID','contrast','cohort','coh3');
-tgds = jc_selectmanyDS(w22ds); % M418, M419, M420
+w11ds = gk_datasetQuery('week','w11','expID','contrast','cohort','coh4');
+tgds = jc_selectmanyDS(w11ds); % M483, M484, M493, M488
 
 
 params=table;
@@ -35,7 +35,7 @@ for d = 1 : size(tgds,1)
 end
 prmsTG = params;
 %%
-wtds = jc_selectmanyDS(w22ds); % M416(2sec ON), M417, M422, M453
+wtds = jc_selectmanyDS(w11ds); % M485, M486, M487, M490
 params=table;
 for d = 1 : size(wtds,1)
     xpr = gk_getTunedROIs(wtds(d,:), 'F',2, 3, 0.0001,0);

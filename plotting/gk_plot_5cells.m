@@ -1,18 +1,14 @@
-clear ax;
-figure;
-for n=1:14
-    ordN=n;
-    c=xpr.onTunedIDs_allGrp(xpr.adjR2_cellSort(ordN));
-    g=xpr.grpOrder(xpr.adjR2_cellSort(ordN),1);
-    h=subplot(2,7,n);
-    gk_plot_tuning(xpr,c,g,xpr.stimValues,'Contrast [%]')
-    axis(h,'normal')
+function gk_plot_5cells(xpr, startCell)
+% USAGE: gk_plot_5cells(xpr, startCell)
+
+if nargin < 2
+    startCell=1;
 end
 
 figure;
 set(gcf, 'Position',  [0, 0, 800, 900])
 for n=1:5
-    ordN=n;
+    ordN=n+startCell-1;
     c=xpr.onTunedIDs_allGrp(xpr.adjR2_cellSort(ordN));
     g=xpr.grpOrder(xpr.adjR2_cellSort(ordN),1);
     min_min=Inf;
@@ -34,4 +30,3 @@ for n=1:5
     clear ax
     pause(0.01)
 end
-

@@ -7,7 +7,7 @@ function xpr = gk_exp_getSigTrials(ds,sigName,t_before_sec, t_after_sec,plane,Fn
 %   t_before_sec: seconds before stim onset
 %   t_after_sec:  seconds after stim offset
 %   plane:        'combined' or 'plane0','plane1',... or 0,1,...
-%   Fneu_factor:  p-value to select ROIs as tuned
+%   Fneu_factor:  factor to multiply Fneu before subtracting it from F
 %
 % Author: Georgios A. Keliris
 %
@@ -25,14 +25,16 @@ stim = loadStim(ds);
 sig = loadSig(ds,sigName,plane);
 if Fneu_factor
     Fneu=loadSig(ds,'Fneu',plane);
-    %sig=sig-0.3*repmat(stimA.v',size(sig,1),1);
-    sig=sig-Fneu_factor*Fneu;
+    sig=sig-Fneu_factor.*Fneu;
 end
 iscell = loadSig(ds,'iscell',plane);
 sig = sig(logical(iscell(:,1)),:);
 
 if (strcmp(ds.cohort,'coh1') || strcmp(ds.cohort,'coh2') ) && ...
-        (strcmp(ds.expID,'contrast') || strcmp(ds.expID,'SF') || strcmp(ds.expID,'TF'))
+        (strfind(ds.expID,'contrast') || strfind(ds.expID,'SF') || strfind(ds.expID,'TF'))
+    if length(stim.IDs)>560
+        stim.IDs=stim.IDs(1:560);
+    end
     try
         stim.Angles=[ones(length(stim.IDs)/4,1); 2*ones(length(stim.IDs)/4,1);...
             3*ones(length(stim.IDs)/4,1); 4*ones(length(stim.IDs)/4,1)];

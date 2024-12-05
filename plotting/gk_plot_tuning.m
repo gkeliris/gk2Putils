@@ -15,8 +15,7 @@ function parameters = gk_plot_tuning(xpr, cellNum, grp, stimValues, xlabelStr,fo
 %                    'all' : fit all the trials
 %
 % Output: parameters - the fitting parameters [optional]
-%
-% See also FitNakaRushton, ComputeNakaRushton
+
 
 % Author: Georgios A. Keliris
 % v1.0 - 16 Oct 2022
@@ -49,8 +48,8 @@ if strcmp(fitChoice,'all')
 end
 yline([0],'--'); hold on;
 errorbar(stim.Values,sig.Mean,sig.Sem,'ko','MarkerFaceColor',[0 0 0]);
-xlabel(xlabelStr);
-ylabel('\DeltaF/F');
+%xlabel(xlabelStr);
+%ylabel('\DeltaF/F');
 title(['CELL#: ' num2str(cellNum) ', ROI#: ' num2str(xpr.cellIDs(cellNum))]);
 %% GET THE MODEL FIT PARAMETERS FOR DIFFERENT EXP TYPES
 switch xpr.expType

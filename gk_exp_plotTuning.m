@@ -1,5 +1,5 @@
-function gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr,xpr_recalc,plane)
-% USAGE: gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr,[xpr_recalc],plane)
+function gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr,xpr_recalc,plane,Fneu_factor)
+% USAGE: gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr,[xpr_recalc],plane,Fneu_factor)
 %
 % INPUT:
 %   ds :        the output of gk_datasetQuery
@@ -17,6 +17,9 @@ function gk_exp_plotTuning(ds,sigName,t_before,t_after,whichROI,pthr,xpr_recalc,
 % Author: Georgios A. Keliris
 %
 % See also gk_getTunedROIs, gk_plot_tuning, gk_plot_trials
+if nargin < 8
+    Fneu_factor=0.7;
+end
 if nargin < 7
     xpr_recalc = false;
 end
@@ -25,11 +28,13 @@ if nargin < 8
 end
 exportPath = setExportPath;
 ds = gk_selectDS(ds);
-xpr = gk_getTunedROIs(ds,sigName,t_before,t_after,pthr,xpr_recalc,plane);
+xpr = gk_getTunedROIs(ds,sigName,t_before,t_after,pthr,Fneu_factor,xpr_recalc,plane);
 
 if size(xpr.onTunedIDs_allGrp,1)==0
     fprintf('No tuned neurons, try with a relaxed statistical pThreshold\n');
     return
+else
+    fprintf('This dataset has:%d/%d tuned neurons\n',numel(xpr.onTunedIDs_allGrp),numel(xpr.pONmin));
 end
 multiGrp=false;
 export=false;
@@ -99,10 +104,12 @@ for roi=ROIs
             %ylim([-0.2 4.8])
             title(['ROI#=', num2str(xpr.cellIDs(roi)), ', angle=', num2str(angles(g))]);
         end
+        if numel(xpr.grp)>1
         [~,n]=max(cellfun(@(x) x(2),ylim(ax(1:numel(xpr.grp)))));
         set(ax(1:numel(xpr.grp)),'YLIM',ylim(ax(n)));
         [~,n]=max(cellfun(@(x) x(2),ylim(ax(numel(xpr.grp)+1:2*numel(xpr.grp)))));
         set(ax(numel(xpr.grp)+1:2*numel(xpr.grp)),'YLIM',ylim(ax(numel(xpr.grp)+n)));
+        end
     else
         g=1;
         subplot(1,2,1);
