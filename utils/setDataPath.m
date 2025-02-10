@@ -1,4 +1,4 @@
 function dataPath = setDataPath()
 
 dataPath = ...
-    '/mnt/NAS_UserStorage/georgioskeliris/MECP2TUN/';
+    '/mnt/NAS_DataStorage/Data_active/LRN2P/';
