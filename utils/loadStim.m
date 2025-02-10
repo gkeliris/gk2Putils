@@ -12,7 +12,7 @@ if isfile(fullfile(sesPath,'matlabana','stim.mat'))
     load(fullfile(sesPath,'matlabana','stim.mat'));
     if ~isfield(stim,'IDs')
         fprintf('%s, %s, %s, %s: addStimulus info missing\n',...
-            ds.cohort,ds.week,ds.mouseID,ds.expID)
+            ds.cohort,ds.day,ds.mouseID,ds.expID)
         return
     end
 else
@@ -30,7 +30,7 @@ else
         load(fullfile(sesPath,'matlabana','stim.mat'));
     catch    
         fprintf('%s, %s, %s, %s: stim.mat is not yet created\n',...
-            ds.cohort,ds.week,ds.mouseID,ds.expID)
+            ds.cohort,ds.day,ds.mouseID,ds.expID)
         return
     end
 end

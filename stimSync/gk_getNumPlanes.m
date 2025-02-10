@@ -8,8 +8,14 @@ function nPlanes = gk_getNumPlanes(tif_file)
 %
 % OUTPUT: nPlanes - a scalar number of planes
 if istable(tif_file)
-    ds=gk_selectDS(tif_file);
-    tif_file=fullfile(ds.rawPath,ds.firstTiff);
+    try
+        ops = loadOps(tif_file);
+        nPlanes = ops.num_scanning_depths;
+        return
+    catch
+        ds=gk_selectDS(tif_file);
+        tif_file=fullfile(ds.rawPath,ds.firstTiff);
+    end
 end
 
 header = imfinfo(tif_file);

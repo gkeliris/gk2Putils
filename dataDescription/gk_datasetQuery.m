@@ -2,14 +2,14 @@ function ds = gk_datasetQuery(varargin)
 % USAGE: ds = gk_datasetQuery(varargin)
 %
 % INPUT: pairs of inputs:   'name',     'value'
-%                           'cohort',   ['coh1','coh2','coh3',..]
-%                           'week',     ['w11','w22']
-%                           'mouseID',  ['M10', 'M11',...]
+%                           'cohort',   ['lrn1',..]
+%                           'day',      ['d0','d1','d2',...]
+%                           'mouseID',  ['M827',...]
 %                           'session',  ['ses1', 'ses2',...]
-%                           'expID',    ['contrast','OR','DR','OO',...]
+%                           'expID',    ['Familiar','DR',...]
 %           
 % example:
-% ds = gk_datasetQuery('week','w11','expID','contrast','mouseID','M11')
+% ds = gk_datasetQuery('day','d6','expID','Familiar','mouseID','M827')
 %
 % Author: Georgios A. Keliris
 
@@ -21,16 +21,15 @@ for i = 1:2:length(varargin) % work for a list of name-value pairs
 end
 prm.make = 1;
 use_strcmp=false;
-dataPath=setDataPath;
 % read the table from the CSV file
-T = readtable(fullfile(dataPath,'MECP2_datasets.csv'),'TextType','string');
+T = readtable(fullfile('/mnt/NAS_UserStorage/Mingyu/learning/2P imaging/','LRN2P_datasets.csv'),'TextType','string');
 
 if ~isfield(prm, 'cohort')
     prm.cohort = unique(T.cohort);
 elseif isempty(find(strcmp(unique(T.cohort),prm.cohort), 1))
     prm.cohort = 'NULL';
 end
-if ~isfield(prm, 'week')
+if ~isfield(prm, 'day')
     prm.week = unique(T.week);
 end
 if ~isfield(prm, 'mouseID')
@@ -49,11 +48,11 @@ else
 end
 
 if use_strcmp
-    ds = T(contains(T.cohort,prm.cohort) & contains(T.week,prm.week) & ...
+    ds = T(contains(T.cohort,prm.cohort) & contains(T.day,prm.day) & ...
         strcmp(T.mouseID,prm.mouseID) & contains(T.session,prm.session) & ...
         contains(T.expID, prm.expID),:);
 else
-    ds = T(contains(T.cohort,prm.cohort) & contains(T.week,prm.week) & ...
+    ds = T(contains(T.cohort,prm.cohort) & contains(T.day,prm.day) & ...
     contains(T.mouseID,prm.mouseID) & contains(T.session,prm.session) & ...
     contains(T.expID, prm.expID),:);
 end
