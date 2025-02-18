@@ -17,11 +17,35 @@ if ~isfolder(fullfile(setSesPath(ds),'matlabana'))
     mkdir(fullfile(setSesPath(ds),'matlabana'));
 end
 save(fullfile(setSesPath(ds),'matlabana','stim_t'),'stim_t');
+%load(fullfile(setSesPath(ds),'matlabana','stim_t'),'stim_t');
+
 frame_t = gk_getFrameTimes(h5, gk_getNumPlanes(ds));
 save(fullfile(setSesPath(ds),'matlabana','frame_t'),'frame_t');
 stim.Times = gk_getStimFrameTimes(stim_t,frame_t);
-save(fullfile(setSesPath(ds),'matlabana','stim'),'stim');
+%save(fullfile(setSesPath(ds),'matlabana','stim'),'stim');
 
+stim.expType=ds.expID;
+
+if strcmp(ds.expID{1}(1:2),'DR')
+    load(fullfile(ds.matfolder,ds.matfile),'blockseq_DR15');
+    [stim.Values,~,stim.IDs]=unique(blockseq_DR15);
+elseif strcmp(ds.expID{1}(1:6),'FamNov')
+    load(fullfile(ds.matfolder,ds.matfile),'angles','angles1',...
+        'reversals','blocks','blocks_id');
+    stim.Values=[angles, angles1];
+    stim.IDs=[];
+    for b=1:blocks
+        stim.IDs=[stim.IDs; ones(reversals,1)*blocks_id(b)];
+    end
+    
+elseif strcmp(ds.expID{1}(1:8),'Familiar')
+    load(fullfile(ds.matfolder,ds.matfile),'angles','reversals','blocks');
+    stim.Values=angles;
+    stim.IDs=ones(reversals*blocks,1);
+    
+end
+
+    
 % d=dir(fullfile(setSesPath(ds),'matlabana','Contrast*.mat'));
 % load(fullfile(d.folder,d.name),'Stims','StimTypes','angles');
 % stim.expType='contrast';
@@ -30,13 +54,14 @@ save(fullfile(setSesPath(ds),'matlabana','stim'),'stim');
 % StimTyps=StimTypes;
 % stim.Values=StimTyps;
 % stim.AnglesValues=angles;
-% Ntrials = size(stim.Times.frame_onsets,2);
-% Ntrials_equal = Ntrials - rem(Ntrials,numel(stim.Values));
-% if Ntrials>numel(stim.IDs)
-%     stim.IDs=[stim.IDs; stim.IDs];
-% end
-% stim.IDs=stim.IDs(1:Ntrials_equal);
-% save(fullfile(setSesPath(ds),'matlabana','stim'),'stim');
+Ntrials = size(stim.Times.frame_onsets,2);
+Ntrials_equal = Ntrials - rem(Ntrials,numel(stim.Values));
+if Ntrials>numel(stim.IDs)
+    stim.IDs=[stim.IDs; stim.IDs];
+end
+stim.IDs=stim.IDs(1:Ntrials_equal);
+
+save(fullfile(setSesPath(ds),'matlabana','stim'),'stim');
 
 % stimA = gk_get_stimArtifact(ds.rawPath, ds.firstTiff)
 % save(fullfile(setSesPath(ds),'matlabana','stimA'),'stimA');

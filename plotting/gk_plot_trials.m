@@ -45,7 +45,7 @@ xline(0,':','stim ON');
 xline(xpr.stim_dur,':','stim OFF');
 xlabel('time [s]')
 ylabel('\DeltaF/F')
-legend(num2str(stimValues),'Location','northwest');
+legend(num2str(stimValues(:)),'Location','northwest');
 title(['CELL#: ' num2str(cellNum) ', ROI#: ' num2str(xpr.cellIDs(cellNum))]);
 
 return

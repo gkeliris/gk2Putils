@@ -1,4 +1,4 @@
-function stat = loadSig(ds, sigName, plane)
+function sig = loadSig(ds, sigName, plane)
 % USAGE: sig = loadSig(ds, sigName, [plane])
 %
 % INPUT:

@@ -1,4 +1,4 @@
-function [sigMeanON, sigSemON] = gk_get_CRF(sig, roiNum, stimValues)
+function [sigMeanON, sigSemON] = gk_get_tuning(sig, roiNum)
 % USAGE: gk_get_CRF(sig, roiNum, stimValues)
 %
 % Function that gets the tuning function of roi/neuron

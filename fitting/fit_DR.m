@@ -17,15 +17,15 @@ if strcmp(fitChoice,'wgt')
     prm.ftopt.Weights=[1./sig.Std.^2]';
 end
 try
-    [prm.f, prm.gof] = fit(stim.Values',double(sig.Mean'), prm.ft, prm.ftopt);
+    [prm.f, prm.gof] = fit(stim.Values(:),double(sig.Mean'), prm.ft, prm.ftopt);
     if strcmp(fitChoice,'all')
         prm.ftopt.StartPoint=[prm.f.Kappa, prm.f.Phi, prm.f.f0, prm.f.f1, prm.f.f2];
         [prm.f, prm.gof] = fit(stim.ValuesNtrials',double(sig.Trials'), prm.ft, prm.ftopt);
     end
 catch ME
-    xpr.tuning_params{cellNum}.gof.adjrsquare=-Inf;
-    xpr.tuning_params{cellNum}.gof.rsquare=-Inf;
-    xpr.tuning_params{cellNum}.maxResp=-Inf;
-    xpr.tuning_params{cellNum}.medianResp=-Inf;
-    xpr.tuning_params{cellNum}.error='ME';
+    prm.gof.adjrsquare=-Inf;
+    prm.gof.rsquare=-Inf;
+    prm.maxResp=-Inf;
+    prm.medianResp=-Inf;
+    prm.error='ME';
 end

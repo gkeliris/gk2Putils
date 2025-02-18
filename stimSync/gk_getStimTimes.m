@@ -73,17 +73,52 @@ photodiode= PD(h5data.time>=tstart & h5data.time<=tend);
 % h2=figure; hold on;
 % histogram(photodiode,'BinMethod','integers','BinLimits',[thr-100 thr+100]); xline(thr,'r--')
 % pause(0.001);
-thr = input('Enter threshold: ');
-%close(h2)
+thr = input('Enter threshold (can be 1 or 2 values): ');
 close(h1);
-stimON=zeros(size(t));
-if min(photodiode)<-1000
-stimON(photodiode<thr)=1;
+if numel(thr)==2
+    thr1=max(thr);
+    thr2=min(thr);
+    stimON1=zeros(size(t));
+    stimON2=zeros(size(t));
+    stimON1(photodiode>thr1)=1;
+    stimON2(photodiode<thr2)=1;
+    s1=needsCleaning(stimON1);
+    s2=needsCleaning(stimON2);
+    stimTimes.onsets1  = t(diff(s1)==1);
+    stimTimes.offsets1 = t(diff(s1)==-1);
+    stimTimes.onsets2  = t(diff(s2)==1);
+    stimTimes.offsets2 = t(diff(s2)==-1);
+    stimTimes.onsets  = t(diff(s1)==1 | diff(s2)==1);
+    stimTimes.offsets = t(diff(s1)==-1 | diff(s2)==-1);
+    s=s1+2*s2;
 else
- stimON(photodiode>thr)=1;
+    stimON=zeros(size(t));
+    if min(photodiode)<-1000
+        stimON(photodiode<thr)=1;
+    else
+        stimON(photodiode>thr)=1;
+    end
+    s=needsCleaning(stimON);
+    stimTimes.onsets  = t(diff(s)==1);
+    stimTimes.offsets = t(diff(s)==-1);
+    
 end
+stimTimes.stim_continuous=s;
+stimTimes.t=t;
 
-s=stimON;
+
+h1=figure; hold on; plot(h5data.time,PD); xlabel('time [s]');
+thr=max(thr);
+plot(t,s/max(s)*150+thr,'m','LineWidth',1.5);
+ylim([thr-100 thr+180])
+pause(0.001)
+answer = input("Check and press a key to continue ","s");
+close(h1);
+return
+
+%%%% helper functions
+function s=needsCleaning(s)
+
 onoff=diff(s);
 edg=find(abs(onoff));
 delta=diff(edg);
@@ -105,22 +140,8 @@ while strcmp(answer,'y')
     end
 end
 close(hc);
-stimTimes.onsets  = t(diff(s)==1);
-stimTimes.offsets = t(diff(s)==-1);
 
-stimTimes.t=t;
-stimTimes.stim_continuous=s;
 
-h1=figure; hold on; plot(h5data.time,PD); xlabel('time [s]');
-
-plot(t,s*150+thr,'m','LineWidth',1.5);
-ylim([thr-100 thr+180])
-pause(0.001)
-answer = input("Check and press a key to continue ","s");
-close(h1);
-return
-
-%%%% helper function
 function [s, delta]=clean(s)
 
 onoff=diff(s);

@@ -18,14 +18,14 @@ if strcmp(fitChoice,'wgt')
 end
 try
     if strcmp(fitChoice,'all')
-        [prm.f, prm.gof]=fit(stim.ValuesNtrials',double(sig.Trials'), prm.ft, prm.ftopt);
+        [prm.f, prm.gof]=fit(stim.ValuesNtrials(:),double(sig.Trials'), prm.ft, prm.ftopt);
     else
-        [prm.f, prm.gof]=fit(stim.Values',double(sig.Mean'), prm.ft, prm.ftopt);
+        [prm.f, prm.gof]=fit(stim.Values(:),double(sig.Mean'), prm.ft, prm.ftopt);
     end
 catch ME
-    xpr.tuning_params{cellNum,grp}.gof.adjrsquare=-Inf;
-    xpr.tuning_params{cellNum,grp}.gof.rsquare=-Inf;
-    xpr.tuning_params{cellNum}.maxResp=-Inf;
-    xpr.tuning_params{cellNum}.medianResp=-Inf;
-    xpr.tuning_params{cellNum,grp}.error='ME';
+    prm.gof.adjrsquare=-Inf;
+    prm.gof.rsquare=-Inf;
+    prm.maxResp=-Inf;
+    prm.medianResp=-Inf;
+    prm.error='ME';
 end
