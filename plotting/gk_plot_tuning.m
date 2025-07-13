@@ -80,6 +80,11 @@ switch xpr.expType
         % code for SF tuning
     case 'TF'
         % code for TF tuning
+    case {'barLR','barRL','barUB','barBU'} 
+        xlabel(xlabelStr);
+        ylabel('\DeltaF/F');
+        parameters = [];
+        return
     otherwise
         error('Unknown experiment type');
 end

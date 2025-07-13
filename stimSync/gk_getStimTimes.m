@@ -1,5 +1,5 @@
-function stimTimes = gk_getStimTimes(h5data)
-% USAGE: stimTimes = gk_getStimTimes(h5data)
+function stimTimes = gk_getStimTimes(h5data, blockThr)
+% USAGE: stimTimes = gk_getStimTimes(h5data, [blockThr])
 %
 % Input: h5data (a structure returned by gk_readH5)
 %
@@ -24,6 +24,9 @@ function stimTimes = gk_getStimTimes(h5data)
 %
 % Author: Georgios A. Keliris
 % v.1.0 - 19 Sep 2022
+if nargin<2
+    blockThr=10000;
+end
 
 ChannelNames=h5data.chNames;
 Num=[1:numel(ChannelNames)]';
@@ -82,14 +85,22 @@ if numel(thr)==2
     stimON2=zeros(size(t));
     stimON1(photodiode>thr1)=1;
     stimON2(photodiode<thr2)=1;
-    s1=needsCleaning(stimON1);
-    s2=needsCleaning(stimON2);
+    [s1, blk_t1]=needsCleaning(stimON1,blockThr);
+    [s2, blk_t2]=needsCleaning(stimON2,blockThr);
     stimTimes.onsets1  = t(diff(s1)==1);
     stimTimes.offsets1 = t(diff(s1)==-1);
     stimTimes.onsets2  = t(diff(s2)==1);
     stimTimes.offsets2 = t(diff(s2)==-1);
+    
     stimTimes.onsets  = t(diff(s1)==1 | diff(s2)==1);
     stimTimes.offsets = t(diff(s1)==-1 | diff(s2)==-1);
+    if ~isempty(blk_t1) || ~isempty(blk_t2)
+        blk_t=(blk_t1+blk_t2)/2;
+        blk_t=[0; blk_t; numel(stimTimes.onsets)];
+        for b=1:numel(blk_t)-1
+            stimTimes.block_trials{b}=blk_t(b)+1:blk_t(b+1);
+        end
+    end     
     s=s1+2*s2;
 else
     stimON=zeros(size(t));
@@ -98,9 +109,15 @@ else
     else
         stimON(photodiode>thr)=1;
     end
-    s=needsCleaning(stimON);
+    [s, blk_t]=needsCleaning(stimON,blockThr);
     stimTimes.onsets  = t(diff(s)==1);
     stimTimes.offsets = t(diff(s)==-1);
+    if ~isempty(blk_t)
+        blk_t=[0; blk_t/2; numel(stimTimes.onsets)];
+        for b=1:numel(blk_t)-1
+            stimTimes.block_trials{b}=blk_t(b)+1:blk_t(b+1);
+        end
+    end
     
 end
 stimTimes.stim_continuous=s;
@@ -117,7 +134,7 @@ close(h1);
 return
 
 %%%% helper functions
-function s=needsCleaning(s)
+function [s, blk_t]=needsCleaning(s,blockThr)
 
 onoff=diff(s);
 edg=find(abs(onoff));
@@ -137,6 +154,17 @@ while strcmp(answer,'y')
     end
     if strcmp(answer,'y')
         [s, delta]=clean(s);
+    end
+end
+if find(delta > blockThr) %seconds => probably blocks
+    blks = input("Does the experiment have blocks of presentation y/n [y]? ","s");
+    if isempty(blks)
+        blks='y';
+    end
+    if strcmp(blks,'y')
+        blk_t=find(delta>blockThr);
+    else
+        blk_t=[];
     end
 end
 close(hc);

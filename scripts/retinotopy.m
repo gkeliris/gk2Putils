@@ -1,19 +1,39 @@
-ds = gk_datasetQuery('day','d6','expID','barLR','mouseID','M827')
-FTS_LR=gk_getRetPhaseAmp(ds,40);
-ds = gk_datasetQuery('day','d6','expID','barRL','mouseID','M827')
-FTS_RL=gk_getRetPhaseAmp(ds,40); 
-ds = gk_datasetQuery('day','d6','expID','barBU','mouseID','M827')
-FTS_BU=gk_getRetPhaseAmp(ds,40); 
-ds = gk_datasetQuery('day','d6','expID','barUB1','mouseID','M827')
-FTS_UB1=gk_getRetPhaseAmp(ds,40); 
-ds = gk_datasetQuery('day','d6','expID','barUB2','mouseID','M827')
-FTS_UB2=gk_getRetPhaseAmp(ds,40); 
+%% average the datasets before FFT
+FTS_azi = gk_retPhaseAmp(ds,0,1);
+% select the two LR and RL datasets
+FTS_ele = gk_retPhaseAmp(ds,0,1);
+% select the two BU and UB datasets
+raw_azimuthMap=FTS_azi.phs;
+raw_altitudeMap=FTS_ele.phs;
 
-raw_azimuthMap=(FTS_LR.stxPHS-FTS_RL.stxPHS)/2;
-raw_altitudeMap=(FTS_BU.stxPHS-FTS_UB2.stxPHS)/2;
+%% average the maps after FFT
+FTS_LR = gk_retPhaseAmp(ds(1,:), false, true);
+FTS_RL = gk_retPhaseAmp(ds(2,:), false, true);
+FTS_BU = gk_retPhaseAmp(ds(3,:), false, true);
+FTS_UB = gk_retPhaseAmp(ds(4,:), false, true);
+raw_azimuthMap=(FTS_LR.phs + FTS_RL.phs) ./2;
+raw_altitudeMap=(FTS_BU.phs + FTS_UB.phs) ./2;
 
-azimuthMap = imgaussfilt(raw_azimuthMap, 5);
-altitudeMap = imgaussfilt(raw_altitudeMap, 5);
+
+%% CALCULATE THE field-sign maps
+neg_ind=find(raw_azimuthMap<0);
+pos_ind=find(raw_azimuthMap>=0);
+raw_azimuthMap(neg_ind)=-raw_azimuthMap(neg_ind);
+raw_azimuthMap(pos_ind)=2*pi-raw_azimuthMap(pos_ind);
+neg_ind=find(raw_altitudeMap<0);
+pos_ind=find(raw_altitudeMap>=0);
+raw_altitudeMap(neg_ind)=-raw_altitudeMap(neg_ind);
+raw_altitudeMap(pos_ind)=2*pi-raw_altitudeMap(pos_ind);
+
+%replace NaNs with random noise [0,2pi] so that they are not propageted by
+%filtering
+aznoise=2*pi*rand(size(raw_azimuthMap));
+raw_azimuthMap(isnan(raw_azimuthMap))=aznoise(isnan(raw_azimuthMap));
+alnoise=2*pi*rand(size(raw_altitudeMap));
+raw_altitudeMap(isnan(raw_altitudeMap))=alnoise(isnan(raw_altitudeMap));
+
+azimuthMap = imgaussfilt(raw_azimuthMap, 40);
+altitudeMap = imgaussfilt(raw_altitudeMap, 40);
 
 % Compute spatial gradients using finite difference method
 [dx_az, dy_az] = gradient(azimuthMap);
@@ -27,13 +47,14 @@ fieldSignMap = sign(jacobianDet);
 
 % Display the field-sign map
 figure;
-imagesc(fieldSignMap);
+%imagesc(fieldSignMap);
+imagesc(rot90(fieldSignMap,2)');
 colormap('jet'); % Use blue/red colormap to visualize +1 and -1
-colorbar;
+%colorbar;
 axis image;
 title('Field-Sign Map');
 
 hold on;
-contour(azimuthMap, 10, 'k'); % Contours of azimuth map
-contour(altitudeMap, 10, 'w'); % Contours of altitude map
+contour(rot90(azimuthMap,2)', 10, 'w'); % Contours of azimuth map
+contour(rot90(altitudeMap,2)', 10, 'r'); % Contours of altitude map
 hold off;

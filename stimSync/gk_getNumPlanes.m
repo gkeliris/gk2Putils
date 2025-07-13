@@ -25,7 +25,7 @@ try
     res2=regexp(sw,pat2,'names');
     z=unique(str2num(res2.z(1:end-1)));
 catch
-    pat2='SI.hStackManager.zs = (?<z>\d)';
+    pat2='SI.hStackManager.zs = (?<z>-?\d)';
     res2=regexp(sw,pat2,'names');
     z=str2num(res2.z);
 end

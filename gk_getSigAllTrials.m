@@ -1,22 +1,31 @@
-function sig = gk_getSigAllTrials(sigMat, stim, t_before_sec, t_after_sec)
-% USAGE: sig = gk_getSigAllTrials(sigMat, stim, t_before_sec, t_after_sec)
+function sig = gk_getSigAllTrials(sigMat, stim, t_before_sec, t_after_sec, calcDF)
+% USAGE: sig = gk_getSigAllTrials(sigMat, stim, t_before_sec, t_after_sec, [calcDF=true])
 %
 % Author: Georgios A. Keliris
+if nargin<5
+    calcDF=true;
+end
 
 sig.expType=stim.expType;
 
 z=1; %for multiplane ROIs that could have different timing, we use the 1st
 
-% Calculate F0 from 20 seconds baseline before stimulus -> F0_bsl
-baseline_dur=20; % seconds
-baseline_frames=round(baseline_dur*stim.Times.frame_fs(z));
-F0_index=stim.Times.frame_onsets(z,1)-baseline_frames:stim.Times.frame_onsets(z,1)-1;
-if F0_index(1)<0
-    F0_index=F0_index(F0_index>0);
-    fprintf('Warning: not enough baseline but taking the median from %f sec\n',...
-        numel(F0_index)/stim.Times.frame_fs(z));
+if calcDF
+    % Calculate F0 from 20 seconds baseline before stimulus -> F0_bsl
+    baseline_dur=20; % seconds
+    baseline_frames=round(baseline_dur*stim.Times.frame_fs(z));
+    F0_index=stim.Times.frame_onsets(z,1)-baseline_frames:stim.Times.frame_onsets(z,1)-1;
+    if F0_index(1)<1
+        F0_index=F0_index(F0_index>0);
+        fprintf('Warning: not enough baseline but taking the median from %f sec\n',...
+            numel(F0_index)/stim.Times.frame_fs(z));
+    end
+    F0_bsl=median(sigMat(:,F0_index),2);
+    subM=1;
+else
+    F0_bsl=1;
+    subM=0;
 end
-F0_bsl=median(sigMat(:,F0_index),2);
 
 % Calculate the number of frames before, during, and after stimulus onset
 t_before_frames = max(round(t_before_sec*stim.Times.frame_fs(z)),1);
@@ -62,10 +71,12 @@ end
 temp=sigMat(:,fromTo);
 sig.trials = reshape(temp,[size(temp,1), trial_dur, numel(i_from)]);
 sig.trials_dF_F = (sig.trials ./ repmat(mean(sig.trials(:,max(t_before_frames-4,1):t_before_frames,:),2),[1,trial_dur,1])) - 1;
-sig.trials_ONresp = squeeze(mean(sig.trials_dF_F(:,min(t_before_frames+2,t_dur):t_before_frames+t_dur+t_ext,:),2));
+sig.trials_ONresp_trial = squeeze(mean(sig.trials_dF_F(:,min(t_before_frames+2,t_dur):t_before_frames+t_dur+t_ext,:),2));
 
-sig.trials_dF_F0_bsl = (sig.trials ./ repmat(F0_bsl,1,size(sig.trials,2),size(sig.trials,3))) - 1;
-sig.trials_ONresp_bsl = squeeze(mean(sig.trials_dF_F0_bsl(:,t_before_frames+3:t_before_frames+t_dur+t_ext,:),2));
+sig.trials_dF_F0_bsl = (sig.trials ./ repmat(F0_bsl,1,size(sig.trials,2),size(sig.trials,3))) - subM;
+baseline = mean(sig.trials_dF_F0_bsl(:,t_before_frames-4:t_before_frames,:),2);
+sig.trials_dF_F0_bsl = sig.trials_dF_F0_bsl - repmat(baseline,1,28,1);
+sig.trials_ONresp = squeeze(mean(sig.trials_dF_F0_bsl(:,t_before_frames+3:t_before_frames+t_dur+t_ext,:),2));
 %sig.trials_ONresp = squeeze(mean(sig.trials(:,t_before_frames+3:t_before_frames+t_dur+t_ext,:),2));
 %sig.trials_OFFresp = squeeze(mean(sig.trials_dF_F(:,t_before_frames+t_dur+3:t_before_frames+t_dur+t_after_frames-3,:),2));
 
@@ -81,6 +92,7 @@ for g=1:nGrps
         end
         sig.sorted_trials{s,g} = sig.trials(:,:,ind);
         sig.sorted_trials_dF_F{s,g} = sig.trials_dF_F(:,:,ind);
+        sig.sorted_trials_ONresp_trial{s,g} = sig.trials_ONresp_trial(:,ind);
         sig.sorted_trials_dF_F0_bsl{s,g} = sig.trials_dF_F0_bsl(:,:,ind);
         sig.sorted_trials_ONresp{s,g} = sig.trials_ONresp(:,ind);
     end

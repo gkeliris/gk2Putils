@@ -6,11 +6,13 @@ function xpr = gk_getTunedROIs(ds,sigName,before,after,p_thr,Fneu_factor,xpr_rec
 %
 % INPUT:
 %   ds :        the output of gk_datasetQuery
-%   sigName:    which signal ['F','Fneu','spks']
+%   sigName:    which signal ['F','Fneu','spks'] or [raw, result,
+%   deltaf_raw, deltaf_result] in case of FISSA
 %   before:     seconds before stim onset
 %   after:      seconds after stim offset
 %   pthr:       p-value to select ROIs as tuned
-%   Fneu_factor: the factor to multiply Fneu to subtract from F
+%   Fneu_factor: the factor to multiply Fneu to subtract from F (irrelevant
+%   for FISSA)
 %   [plane]:    'combined' or 'plane0','plane1',... or 0,1,...
 %
 % Author: Georgios A. Keliris
@@ -26,14 +28,23 @@ end
 if nargin < 8
     plane = 'combined';
 end
+if ~ischar(plane)
+    plane = ['plane' num2str(plane)];
+end
+
 saveFilename=['xpr_', sigName, '_bef:',num2str(before), '_aft:', num2str(after),...
     '_pthr:', sprintf('%.1e',p_thr), '_', plane, '_', num2str(Fneu_factor), '.mat'];
 
 if isfile(fullfile(setSesPath(ds), 'matlabana',saveFilename)) && ~xpr_recalc
-    load(fullfile(setSesPath(ds), 'matlabana',saveFilename));
+    fprintf('This has been calculated before. Loading...\n');
+    load(fullfile(setSesPath(ds), 'matlabana',saveFilename),'xpr');
     xpr.saveFilename=saveFilename;
 else
-    xpr = gk_exp_getSigTrials(ds,sigName,before,after,plane,Fneu_factor);
+    if contains(sigName,'deltaf')
+        xpr = gk_exp_getSigTrialsFissa(ds,sigName,before, after, plane);
+    else
+        xpr = gk_exp_getSigTrials(ds,sigName,before,after,plane,Fneu_factor);
+    end
     
     if isfield(xpr,'stimAngles')
         nGrps=numel(unique(xpr.stimAngles));

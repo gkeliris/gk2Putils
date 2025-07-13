@@ -10,9 +10,14 @@ function gk_getStimulus(ds)
 % November 2024 
 
 ds = gk_selectDS(ds);
+if strcmp(ds.expID{1}(1:3),'bar')
+    blockThr=1500;
+else
+    blockThr=10000;
+end
 d=dir(fullfile(ds.rawPath,'*.h5'));
 h5=gk_readH5(fullfile(ds.rawPath,d.name));
-stim_t = gk_getStimTimes(h5);
+stim_t = gk_getStimTimes(h5, blockThr);
 if ~isfolder(fullfile(setSesPath(ds),'matlabana'))
     mkdir(fullfile(setSesPath(ds),'matlabana'));
 end
@@ -29,6 +34,9 @@ stim.expType=ds.expID;
 if strcmp(ds.expID{1}(1:2),'DR')
     load(fullfile(ds.matfolder,ds.matfile),'blockseq_DR15');
     [stim.Values,~,stim.IDs]=unique(blockseq_DR15);
+elseif strcmp(ds.expID{1}(1:3),'bar')
+    stim.Values=stim.Times.block_trials{1};
+    stim.IDs=repmat(stim.Values,1, numel(stim.Times.block_trials))';
 elseif strcmp(ds.expID{1}(1:6),'FamNov')
     load(fullfile(ds.matfolder,ds.matfile),'angles','angles1',...
         'reversals','blocks','blocks_id');

@@ -1,36 +1,23 @@
-function xpr = gk_exp_getSigTrials(ds,sigName,t_before_sec, t_after_sec,plane,Fneu_factor)
-% USAGE: xpr = gk_exp_getSigTrials(ds,sigName,t_before_sec, t_after_sec,[plane],[Fneu_factor])
+function xpr = gk_exp_getSigTrialsFissa(ds,sigName,t_before_sec, t_after_sec,plane)
+% USAGE: xpr = gk_exp_getSigTrialsFissa(ds,sigName,t_before_sec, t_after_sec,plane)
 %
 % INPUT:
 %   ds :    the output of gk_datasetQuery
-%   sigName:    which signal ['F','Fneu','spks']
+%   sigName:    'result','raw', 'deltaf_result', 'deltaf_raw',...
 %   t_before_sec: seconds before stim onset
 %   t_after_sec:  seconds after stim offset
-%   plane:        'combined' or 'plane0','plane1',... or 0,1,...
-%   Fneu_factor:  factor to multiply Fneu before subtracting it from F
-%                 (ignored if sigName is 'spks')
+%   plane:        'plane0','plane1',... or 0,1,...
+%
 %
 % Author: Georgios A. Keliris
 %
 % See also gk_getSigAllTrials, readNPY
 
-if nargin < 6
-    Fneu_factor = false;
-end
-if nargin < 5
-    plane = 'combined';
-end
 
 ds = gk_selectDS(ds);
 stim = loadStim(ds);
-sig = loadSig(ds,sigName,plane);
-if Fneu_factor & ~strcmp(sigName,'spks')
-    Fneu=loadSig(ds,'Fneu',plane);
-    sig=sig-Fneu_factor.*Fneu;
-end
+sig = loadFissa(ds,sigName,plane);
 iscell = loadSig(ds,'iscell',plane);
-sig = sig(logical(iscell(:,1)),:);
-
 if (strcmp(ds.cohort,'coh1') || strcmp(ds.cohort,'coh2') ) && ...
         (strfind(ds.expID,'contrast') || strfind(ds.expID,'SF') || strfind(ds.expID,'TF'))
     if length(stim.IDs)>560
@@ -51,8 +38,12 @@ if (strcmp(ds.cohort,'coh1') || strcmp(ds.cohort,'coh2') ) && ...
     end
         
 end
-
-xpr = gk_getSigAllTrials(sig,stim,t_before_sec, t_after_sec);
+if contains(sigName,'deltaf')
+    calcDF=false;
+else
+    calcDF=true;
+end
+xpr = gk_getSigAllTrials(sig,stim,t_before_sec, t_after_sec, calcDF);
 xpr.ds=ds;
 xpr.cellIDs=find(iscell(:,1));
 xpr.cohort=ds.cohort;

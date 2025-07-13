@@ -47,4 +47,4 @@ if (strcmpi(ds.cohort,'coh1') || strcmpi(ds.cohort,'coh2')) && strcmpi(ds.expID,
         xline(stim.Times.onsets(end)+4,'b--');
     end
 end
-legend(num2str(stim.Values),'location','EastOutside')
+legend(num2str(stim.Values(:)),'location','EastOutside')
