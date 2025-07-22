@@ -1,15 +1,15 @@
-function ds = gk_datasetQuery(varargin)
-% USAGE: ds = gk_datasetQuery(varargin)
+function ds = gk_datasetQueryLRN2P(varargin)
+% USAGE: ds = gk_datasetQueryLRN2P(varargin)
 %
 % INPUT: pairs of inputs:   'name',     'value'
-%                           'cohort',   ['tepi1',..]
-%                           'timepoint',['T0','T1','T1H',...]
-%                           'mouseID',  ['DS1','WT1'...]
+%                           'cohort',   ['lrn1',..]
+%                           'day',      ['d0','d1','d2',...]
+%                           'mouseID',  ['M827',...]
 %                           'session',  ['ses1', 'ses2',...]
-%                           'expID',    ['contrast1','spontaneous2',...]
+%                           'expID',    ['Familiar','DR',...]
 %           
 % example:
-% ds = gk_datasetQuery('timepoint','T0','expID','contrast1','mouseID','DS1')
+% ds = gk_datasetQuery('day','d6','expID','Familiar','mouseID','M827')
 %
 % Author: Georgios A. Keliris
 
@@ -22,15 +22,15 @@ end
 prm.make = 1;
 use_strcmp=false;
 % read the table from the CSV file
-T = readtable(fullfile('/mnt/NAS_DataStorage/Data_raw/Temperature_epilepsy/','TEPI_datasets.csv'),'TextType','string');
+T = readtable(fullfile('/mnt/NAS_UserStorage/Mingyu/learning/2P imaging/','LRN2P_datasets.csv'),'TextType','string');
 
 if ~isfield(prm, 'cohort')
     prm.cohort = unique(T.cohort);
 elseif isempty(find(strcmp(unique(T.cohort),prm.cohort), 1))
     prm.cohort = 'NULL';
 end
-if ~isfield(prm, 'timepoint')
-    prm.timepoint = unique(T.timepoint);
+if ~isfield(prm, 'day')
+    prm.week = unique(T.week);
 end
 if ~isfield(prm, 'mouseID')
     prm.mouseID = unique(T.mouseID);
@@ -48,11 +48,11 @@ else
 end
 
 if use_strcmp
-    ds = T(contains(T.cohort,prm.cohort) & contains(T.timepoint,prm.timepoint) & ...
+    ds = T(contains(T.cohort,prm.cohort) & contains(T.day,prm.day) & ...
         strcmp(T.mouseID,prm.mouseID) & contains(T.session,prm.session) & ...
         contains(T.expID, prm.expID),:);
 else
-    ds = T(contains(T.cohort,prm.cohort) & contains(T.timepoint,prm.timepoint) & ...
+    ds = T(contains(T.cohort,prm.cohort) & contains(T.day,prm.day) & ...
     contains(T.mouseID,prm.mouseID) & contains(T.session,prm.session) & ...
     contains(T.expID, prm.expID),:);
 end

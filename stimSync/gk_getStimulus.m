@@ -11,12 +11,19 @@ function gk_getStimulus(ds)
 
 ds = gk_selectDS(ds);
 if strcmp(ds.expID{1}(1:3),'bar')
-    blockThr=1500;
+    blockThr=1500;s
 else
     blockThr=10000;
 end
 d=dir(fullfile(ds.rawPath,'*.h5'));
-h5=gk_readH5(fullfile(ds.rawPath,d.name));
+if ~isempty(d)
+    h5=gk_readH5(fullfile(ds.rawPath,d.name));
+    isMeso=true;
+else
+    d=dir(fullfile(ds.rawPath,'*.csv'));
+    h5=readtable(fullfile(ds.rawPath,d.name));
+    isMeso=false;
+end
 stim_t = gk_getStimTimes(h5, blockThr);
 if ~isfolder(fullfile(setSesPath(ds),'matlabana'))
     mkdir(fullfile(setSesPath(ds),'matlabana'));
@@ -24,13 +31,18 @@ end
 save(fullfile(setSesPath(ds),'matlabana','stim_t'),'stim_t');
 %load(fullfile(setSesPath(ds),'matlabana','stim_t'),'stim_t');
 
-frame_t = gk_getFrameTimes(h5, gk_getNumPlanes(ds));
+%% Frame times
+if isMeso
+    frame_t = gk_getFrameTimes(h5, gk_getNumPlanes(ds));
+else
+    frame_t = gk_getBrukerFrames(ds);
+end
 save(fullfile(setSesPath(ds),'matlabana','frame_t'),'frame_t');
 stim.Times = gk_getStimFrameTimes(stim_t,frame_t);
 %save(fullfile(setSesPath(ds),'matlabana','stim'),'stim');
 
 stim.expType=ds.expID;
-
+if isMeso
 if strcmp(ds.expID{1}(1:2),'DR')
     load(fullfile(ds.matfolder,ds.matfile),'blockseq_DR15');
     [stim.Values,~,stim.IDs]=unique(blockseq_DR15);
@@ -45,15 +57,15 @@ elseif strcmp(ds.expID{1}(1:6),'FamNov')
     for b=1:blocks
         stim.IDs=[stim.IDs; ones(reversals,1)*blocks_id(b)];
     end
-    
 elseif strcmp(ds.expID{1}(1:8),'Familiar')
     load(fullfile(ds.matfolder,ds.matfile),'angles','reversals','blocks');
     stim.Values=angles;
-    stim.IDs=ones(reversals*blocks,1);
-    
+    stim.IDs=ones(reversals*blocks,1)
 end
-
-    
+else
+    stim.Values=repmat([0 1.5 6.25 12.5 25 50 100 0 0 0],1,5);
+    stim.IDs=repmat([0 1 2 3 4 5 6 0 0 0],1,5);
+end
 % d=dir(fullfile(setSesPath(ds),'matlabana','Contrast*.mat'));
 % load(fullfile(d.folder,d.name),'Stims','StimTypes','angles');
 % stim.expType='contrast';

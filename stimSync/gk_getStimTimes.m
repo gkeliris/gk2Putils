@@ -1,7 +1,7 @@
 function stimTimes = gk_getStimTimes(h5data, blockThr)
 % USAGE: stimTimes = gk_getStimTimes(h5data, [blockThr])
 %
-% Input: h5data (a structure returned by gk_readH5)
+% Input: h5data (a structure returned by gk_readH5) or a table from .csv
 %
 % Output: structure stimTimes with subfields .onsets and .offsets in [s]
 %
@@ -27,21 +27,32 @@ function stimTimes = gk_getStimTimes(h5data, blockThr)
 if nargin<2
     blockThr=10000;
 end
-
-ChannelNames=h5data.chNames;
+if isstruct(h5data)
+    ChannelNames=h5data.chNames;
+    csvTable=false;
+else
+    ChannelNames=h5data.Properties.VariableNames';
+    csvTable=true;
+end
 Num=[1:numel(ChannelNames)]';
 T=table(Num,ChannelNames)
 PD_channel=input("Enter the number of the photodiode channel: ");
-try
-    PD = eval(['h5data.' T.ChannelNames{PD_channel}]);
-catch
-    %PD = h5data.AI5;
-    keyboard
+if csvTable
+    PD = h5data.(ChannelNames{PD_channel});
+    times = h5data.(ChannelNames{1})/1000; %convert to seconds
+else
+    try
+        PD = eval(['h5data.' T.ChannelNames{PD_channel}]);
+        times = h5data.time;
+    catch
+        %PD = h5data.AI5;
+        keyboard
+    end
 end
 % if reverse
 %     
 % end
-h1=figure; hold on; plot(h5data.time,PD); xlabel('time [s]');
+h1=figure; hold on; plot(times,PD); xlabel('time [s]');
 pause(0.001);
 getreversal=true;
 while getreversal
@@ -52,7 +63,7 @@ while getreversal
         getreversal=false;
         PD = max(PD) - PD;
         close(h1)
-        h1=figure; hold on; plot(h5data.time,PD); xlabel('time [s]');
+        h1=figure; hold on; plot(times,PD); xlabel('time [s]');
     else
         fprintf('please enter y or n\n')
     end
@@ -60,14 +71,14 @@ end
 
 [tstartend] = input("If necessary enter start/end time in seconds [else press enter]. [tstart tend] = ");
 if isempty(tstartend)
-    tstart=h5data.time(1);
-    tend=h5data.time(end);
+    tstart=times(1);
+    tend=times(end);
 else
     tstart=tstartend(1); 
     tend=tstartend(2);
 end
-t = h5data.time(h5data.time>=tstart & h5data.time<=tend);
-photodiode= PD(h5data.time>=tstart & h5data.time<=tend);
+t = times(times>=tstart & times<=tend);
+photodiode= PD(times>=tstart & times<=tend);
 
 
 % thr = input('Enter approximate threshold: ');
@@ -124,7 +135,7 @@ stimTimes.stim_continuous=s;
 stimTimes.t=t;
 
 
-h1=figure; hold on; plot(h5data.time,PD); xlabel('time [s]');
+h1=figure; hold on; plot(times,PD); xlabel('time [s]');
 thr=max(thr);
 plot(t,s/max(s)*150+thr,'m','LineWidth',1.5);
 ylim([thr-100 thr+180])
