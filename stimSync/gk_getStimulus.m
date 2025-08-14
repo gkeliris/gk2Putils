@@ -10,7 +10,7 @@ function gk_getStimulus(ds)
 % November 2024 
 
 ds = gk_selectDS(ds);
-if strcmp(ds.expID{1}(1:3),'bar')
+if strfind(ds.expID{1},'bar')==1
     blockThr=1500;
 else
     blockThr=10000;

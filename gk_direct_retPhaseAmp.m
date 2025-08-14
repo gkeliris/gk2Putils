@@ -1,5 +1,5 @@
-function FTS = gk_retPhaseAmp(ds, deltaF, useAverageSweep, directLoad)
-% USAGE: FTS = gk_retPhaseAmp(ds, [deltaF], [useAverageSweep], [directLoad])
+function FTS = gk_direct_retPhaseAmp(ds, deltaF, useAverageSweep, stim, reverse, directLoad)
+% USAGE: FTS = gk_direct_retPhaseAmp(ds, [deltaF], [useAverageSweep], [directLoad])
 %
 % INPUT:
 %   ds -> a table returned by gk_datasetQuery (which reads a .csv file)
@@ -27,7 +27,7 @@ function FTS = gk_retPhaseAmp(ds, deltaF, useAverageSweep, directLoad)
 % v0.2 April 4, 2025
 
 %% Predefine some info used for calculations
-if nargin < 4
+if nargin < 6
     directLoad = false;
 end
 if nargin < 3
@@ -45,13 +45,13 @@ tic
 for d = 1:size(ds,1)
     
     % Load the OPS
-    ops{d}=loadOps(ds(d,:));
+    % ops{d}=loadOps(ds(d,:));
     
     % Get the indices of the sweeps
-    swps{d}=getSweeps(ds(d,:));
+    swps{d}=getSweepsDirect(stim,reverse);
     
     % Find the folders for each plane_ROI
-    planes{d}=dir(fullfile(setSesPath(ds(d,:)),'suite2p_orig','plane*'));
+    %planes{d}=dir(fullfile(setSesPath(ds(d,:)),'suite2p_orig','plane*'));
 end
 %% Define some parameters for the FFT
 if useAverageSweep
@@ -67,12 +67,12 @@ Fv = linspace(0,1,fix(L/2)+1)*Fn;
 Iv = 1:length(Fv);
 
 %% Load the data and perform FFT per plane
-for p=1:numel(planes{1})
+for p=1:numel(ds.planes)
     for d = 1:size(ds,1)
-        tic
-        fprintf('Loading data: ds %s, plane %d\n',ds(d,:).expID, p);
-        plane{p,d}=loadSuite2pBinary(ds(d,:), p-1, swps{d}.start, swps{d}.stop);
-        toc
+        %tic
+        %fprintf('Loading data: ds %s, plane %d\n',ds(d,:).expID, p);
+        plane{p,d}=ds.planes{p};%loadSuite2pBinary(ds(d,:), p-1, swps{d}.start, swps{d}.stop);
+        %toc
         % calculate the mean image per plane
         mean_image{p,d} = mean(plane{p,d},3);
         plane{p,d}=double(plane{p,d});
@@ -90,8 +90,10 @@ for p=1:numel(planes{1})
         plane{p,d}=plane{p,d}(:,:,swps{d}.allIndRelative);
         [Dim1,Dim2,~]=size(plane{p,d});
         if useAverageSweep
-            plane{p,d}=mean(reshape(plane{p,d},size(plane{p,d},1),size(plane{p,d},2),...
-                swps{d}.useSweepLength+1,swps{d}.nSweeps),4);
+            sweeps=reshape(plane{p,d},size(plane{p,d},1),size(plane{p,d},2),...
+                swps{d}.useSweepLength+1,swps{d}.nSweeps);
+            choice=1:40;
+            plane{p,d}=mean(sweeps(:,:,:,choice),4);
             FREQ_low = 1 - Fv(2)/2;  % Fv(2) is the Freq resolution (Fv(1)=0)
             FREQ_high = 1 + Fv(2)/2;
         else
@@ -135,8 +137,8 @@ if size(ds,1)==2
         mean_image{p,1}= (mean_image{p,1} + mean_image{p,2})./2;
     end
 end
-ops=ops{1};
-planes=planes{1};
+ops=ds.info;
+%planes=planes{1};
 % Get the max dimensions to be able to montage the stitched image
 Sx=max(ops.dx+ops.allLx);
 Sy=max(ops.dy+ops.allLy);
@@ -145,7 +147,7 @@ FTS.mean_image=NaN*zeros(Sy,Sx);
 FTS.phs=NaN*zeros(Sy,Sx);
 FTS.amp=NaN*zeros(Sy,Sx);
 
-for p=1:numel(planes)
+for p=1:numel(ds.planes)
     FTS.mean_image(ops.dy(p)+1:ops.dy(p)+ops.allLy(p),ops.dx(p)+1:ops.dx(p)+ops.allLx(p))=...
         mean_image{p,1};
     FTS.phs(ops.dy(p)+1:ops.dy(p)+ops.allLy(p),ops.dx(p)+1:ops.dx(p)+ops.allLx(p))=...
@@ -155,9 +157,9 @@ for p=1:numel(planes)
 end
 %% Replace potential overlap between planes with a linear blend
 % Check if there is overlap over planes
-ovl = getRoiOverlap(ds(1,:));
+ovl = getRoiOverlapDirect(ds);
 if ~isempty(find(cellfun(@isempty,ovl.stitched),1))
-    for p=1:numel(planes)
+    for p=1:numel(ds.planes)
         if p>1 && ~isempty(ovl.stitched{p-1,p})
             
             overlapFrom=min(ovl.perPlane{p-1,p});
