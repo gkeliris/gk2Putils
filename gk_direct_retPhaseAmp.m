@@ -92,7 +92,7 @@ for p=1:numel(ds.planes)
         if useAverageSweep
             sweeps=reshape(plane{p,d},size(plane{p,d},1),size(plane{p,d},2),...
                 swps{d}.useSweepLength+1,swps{d}.nSweeps);
-            choice=1:40;
+            choice=1:size(sweeps,4);
             plane{p,d}=mean(sweeps(:,:,:,choice),4);
             FREQ_low = 1 - Fv(2)/2;  % Fv(2) is the Freq resolution (Fv(1)=0)
             FREQ_high = 1 + Fv(2)/2;
@@ -115,6 +115,8 @@ for p=1:numel(ds.planes)
         else
             br = fliplr(tmp{1});
         end
+    elseif ~isempty(strfind(ds.expID,'5dots'))
+        br = tmp{1};
     else
         keyboard
     end       
