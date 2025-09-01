@@ -2,6 +2,12 @@
 
 ds=gk_directLoadTiffs;
 ds.expID='5dots';
+% If the intervals of the blocks are weird one has to give a second
+% argument with up to 4 times. These times can be though of as the 1st interval
+% being from - to (i.e. between 1000 and 3500) and the 2nd interval being
+% from 6000 to Inf. Note that in the 5dots experiment the negative values
+% in the photodiode have big time distances between blocks because they are
+% only two while there are 3 dots positive.
 stim=gk_getRetinotopyStim([],[1000 3500 6000 Inf]);
 
 %% First way to analyze (use Fourier like for the bar Retinotopy)

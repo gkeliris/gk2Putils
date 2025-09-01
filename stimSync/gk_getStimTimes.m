@@ -85,7 +85,11 @@ if numel(thr)==2
     stimON2=zeros(size(t));
     stimON1(photodiode>thr1)=1;
     stimON2(photodiode<thr2)=1;
-    [s1, blk_t1]=needsCleaning(stimON1,blockThr(1:2));
+    [s1, blk_t1]=needsCleaning(stimON1,blockThr);
+    if length(blockThr)<4
+        blockThr(3)=blockThr(1);
+        blockThr(4)=Inf;
+    end
     [s2, blk_t2]=needsCleaning(stimON2,blockThr(3:4));
     stimTimes.onsets1  = t(diff(s1)==1);
     stimTimes.offsets1 = t(diff(s1)==-1);
