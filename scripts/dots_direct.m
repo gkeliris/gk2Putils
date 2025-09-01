@@ -2,7 +2,7 @@
 
 ds=gk_directLoadTiffs;
 ds.expID='5dots';
-stim=gk_getRetinotopyStim;
+stim=gk_getRetinotopyStim([],[1000 3500 6000 Inf]);
 
 %% First way to analyze (use Fourier like for the bar Retinotopy)
 FTS_dots = gk_direct_retPhaseAmp(ds, false, true, stim, 0, false);

@@ -1,5 +1,5 @@
-function stim = gk_getRetinotopyStim(h5file)
-% USAGE: stim = gk_getRetinotopyStim(h5file)
+function stim = gk_getRetinotopyStim(h5file, blockThr)
+% USAGE: stim = gk_getRetinotopyStim(h5file, blockThr)
 %
 % this function will create and save the stim.mat file in matlabana folder
 % NOTE: for this to work, image triggers should be in the .h5 file
@@ -9,20 +9,17 @@ function stim = gk_getRetinotopyStim(h5file)
 % Author: Georgios A. Keliris
 % November 2024 
 
-% ds = gk_selectDS(ds);
-% if strfind(ds.expID{1},'bar')==1
-%     blockThr=1500;
-% else
-%     blockThr=10000;
-% end
-% d=dir(fullfile(ds.rawPath,'*.h5'));
-if nargin < 1
+
+if nargin < 1 | isempty(h5file)
     [p,fld]=uigetfile('*.h5');
     h5file=fullfile(fld,p);
 end
+if nargin<2 | isempty(blockThr)
+    blockThr=1500;
+end
 
 h5=gk_readH5(h5file);
-stim_t = gk_getStimTimes(h5, [1000 3500 6000 Inf]);
+stim_t = gk_getStimTimes(h5, blockThr);
 % if ~isfolder(fullfile(setSesPath(ds),'matlabana'))
 %     mkdir(fullfile(setSesPath(ds),'matlabana'));
 % end

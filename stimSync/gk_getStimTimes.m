@@ -25,7 +25,7 @@ function stimTimes = gk_getStimTimes(h5data, blockThr)
 % Author: Georgios A. Keliris
 % v.1.0 - 19 Sep 2022
 if nargin<2
-    blockThr=10000;
+    blockThr=[10000 Inf 10000 Inf];
 end
 
 ChannelNames=h5data.chNames;
