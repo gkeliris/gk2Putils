@@ -3,7 +3,7 @@ function imagedata = stitchMultiTiff(pth,pattern,addOvl,save4Dmat)
 %
 % addOvl : a two element vector [addDX, addDY] values to add to the overlap
 %
-% example: pth=pwd; data = loadMultiTiff(pth,'file*.tif', [15, 0]);
+% example: pth=pwd; data = stitchMultiTiff(pth,'file*.tif', [15, 0]);
 
 % NOTE: from visual inspection the overlap to be added to dx is ~15 pixels
 

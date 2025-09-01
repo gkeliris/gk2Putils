@@ -1,4 +1,9 @@
-function ds = gk_stitch(ds);
+function ds = gk_stitch(ds)
+% USAGE: ds = gk_stitch(ds)
+%
+% Inputs: ds :the output of gk_directLoadTiffs
+%
+% See also: stitchMultiTiff
 
 ops=ds.info;
 %planes=planes{1};

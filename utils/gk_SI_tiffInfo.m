@@ -44,19 +44,27 @@ try SI.nChannels = numel(SI.hChannels.channelSave); end
 try SI.flytoTimePerScanfield = SI.hScan2D.flytoTimePerScanfield; end
 
 % Get some info for each ROI
-SI.nrois=sum(arrayfun(@(x) size(x.zs,1),SI.rois)); %add up all rois. eg. some rois may have 2 planes only, some may have 3 planes.
+if isscalar(SI.zs)
+    SI.nrois=numel(SI.rois);
+else
+    SI.nrois=sum(arrayfun(@(x) size(x.zs,1),SI.rois)); %add up all rois. eg. some rois may have 2 planes only, some may have 3 planes.
+end
 SI.allLy = [];
 SI.allLx = [];
 SI.centerXYdeg = [];
 SI.sizeXYdeg = [];
-for k = 1:SI.nrois
-	SI.allLy(k,1) = SI.rois(k).scanfields(1).pixelResolutionXY(2); % vertical pixels
-	SI.allLx(k,1) = SI.rois(k).scanfields(1).pixelResolutionXY(1); % horizontal pixels
-	SI.centerXYdeg(k, [2 1]) = SI.rois(k).scanfields(1).centerXY; % center coordinates of the ROI in degree angle
-	SI.sizeXYdeg(k, [2 1]) = SI.rois(k).scanfields(1).sizeXY;  % size of the ROI in degree angle
+for k = 1:numel(SI.rois)
+    for z = 1:numel(SI.zs)
+        scanfieldInd=find(SI.rois(k).zs==SI.zs(z));
+    	SI.allLy(k,z) = SI.rois(k).scanfields(scanfieldInd).pixelResolutionXY(2); % vertical pixels
+    	SI.allLx(k,z) = SI.rois(k).scanfields(scanfieldInd).pixelResolutionXY(1); % horizontal pixels
+    	SI.centerXYdeg(k, [2 1], z) = SI.rois(k).scanfields(end).centerXY; % center coordinates of the ROI in degree angle
+    	SI.sizeXYdeg(k, [2 1], z) = SI.rois(k).scanfields(end).sizeXY;  % size of the ROI in degree angle
+    end
 end
 SI.sizeXYum = SI.sizeXYdeg * SI.objectiveResolution; % size in micrometers
 tmp = SI.centerXYdeg-SI.sizeXYdeg/2;
+% IF multiple z, probably below will need to be adjusted
 SI.dx = round((tmp(:,2)-min(tmp(:,2))).*SI.allLx./SI.sizeXYdeg(:,2));
 SI.dy = round((tmp(:,1)-min(tmp(:,1))).*SI.allLy./SI.sizeXYdeg(:,1));
 SI.n_flyback=round(SI.flytoTimePerScanfield/SI.linePeriod);

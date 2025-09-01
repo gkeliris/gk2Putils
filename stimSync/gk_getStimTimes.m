@@ -85,8 +85,8 @@ if numel(thr)==2
     stimON2=zeros(size(t));
     stimON1(photodiode>thr1)=1;
     stimON2(photodiode<thr2)=1;
-    [s1, blk_t1]=needsCleaning(stimON1,blockThr);
-    [s2, blk_t2]=needsCleaning(stimON2,blockThr);
+    [s1, blk_t1]=needsCleaning(stimON1,blockThr(1:2));
+    [s2, blk_t2]=needsCleaning(stimON2,blockThr(3:4));
     stimTimes.onsets1  = t(diff(s1)==1);
     stimTimes.offsets1 = t(diff(s1)==-1);
     stimTimes.onsets2  = t(diff(s2)==1);
@@ -94,8 +94,12 @@ if numel(thr)==2
     
     stimTimes.onsets  = t(diff(s1)==1 | diff(s2)==1);
     stimTimes.offsets = t(diff(s1)==-1 | diff(s2)==-1);
-    if ~isempty(blk_t1) || ~isempty(blk_t2)
-        blk_t=(blk_t1+blk_t2)/2;
+    if ~isempty(blk_t1) %|| ~isempty(blk_t2)
+        if ~isempty(blk_t2)
+            blk_t=(blk_t1+blk_t2)/2;
+        else
+            blk_t=blk_t1;
+        end
         blk_t=[0; blk_t; numel(stimTimes.onsets)];
         for b=1:numel(blk_t)-1
             stimTimes.block_trials{b}=blk_t(b)+1:blk_t(b+1);
@@ -156,16 +160,21 @@ while strcmp(answer,'y')
         [s, delta]=clean(s);
     end
 end
-if find(delta > blockThr) %seconds => probably blocks
+if length(blockThr) < 2
+    blockThr(2) = Inf;
+end
+if find(delta>=blockThr(1) & delta<=blockThr(2)) %seconds => probably blocks
     blks = input("Does the experiment have blocks of presentation y/n [y]? ","s");
     if isempty(blks)
         blks='y';
     end
     if strcmp(blks,'y')
-        blk_t=find(delta>blockThr);
+        blk_t=find(delta>=blockThr(1) & delta<=blockThr(2));
     else
         blk_t=[];
     end
+else
+    blk_t=[];
 end
 close(hc);
 

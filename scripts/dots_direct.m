@@ -46,7 +46,7 @@ end
 % the pre time is 5 frames the stimulus is 5 frames and the post is 5
 % frames, since the stimulus needs some time to go up and down we can take
 % frames 8-13 as a first approximation of the peak activity.
-dot1=mean(ds.trials{1}(:,:,8:13,:),[3,4]);
+dot1=mean(ds.trials{1}(:,:,8:27,:),[3,4]);
 
 % However this is the raw signal, probably is best to convert to DeltaF/F
 % One way to do this is to use the pre time of each dot as baseline

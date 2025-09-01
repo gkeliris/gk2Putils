@@ -22,7 +22,7 @@ if nargin < 1
 end
 
 h5=gk_readH5(h5file);
-stim_t = gk_getStimTimes(h5, 1500);
+stim_t = gk_getStimTimes(h5, [1000 3500 6000 Inf]);
 % if ~isfolder(fullfile(setSesPath(ds),'matlabana'))
 %     mkdir(fullfile(setSesPath(ds),'matlabana'));
 % end
