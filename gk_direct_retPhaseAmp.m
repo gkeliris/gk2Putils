@@ -127,7 +127,12 @@ for p=1:numel(ds.planes)
     toc
     F_amp = abs(fts(Iv,:))*2;
     F_phs = angle(fts(Iv,:));
-
+    % correct phase from [-pi, pi] to [0, 2pi]
+    if ~isempty(strfind(ds.expID,'barRL'))
+        F_phs = mod(-F_phs+pi/2,2*pi);
+    else
+        F_phs = mod(-F_phs-pi/2,2*pi);
+    end
     FTS.ampPerPlane{p}=reshape(F_amp(Fv>FREQ_low & Fv<FREQ_high,:),Dim1,Dim2);
     FTS.phsPerPlane{p}=reshape(F_phs(Fv>FREQ_low & Fv<FREQ_high,:),Dim1,Dim2);
 

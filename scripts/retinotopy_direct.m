@@ -1,9 +1,9 @@
 %%
-p=pathtofirsttif;
-LR=gk_directLoadTiffs(p);
+%p=pathtofirsttif;
+LR=gk_directLoadTiffs;
 LR.expID='barLR';
 stimLR = gk_getRetinotopyStim;
-FTS_LR = gk_direct_retPhaseAmp(RL, false, true, stimLR, 0, false);
+FTS_LR = gk_direct_retPhaseAmp(LR, false, true, stimLR, 0, false);
 figure; imagesc(rot90(FTS_LR.mean_image,2)');
 figure; imagesc(rot90(FTS_LR.phs,2)');
 figure; imagesc(rot90(FTS_LR.amp,2)');

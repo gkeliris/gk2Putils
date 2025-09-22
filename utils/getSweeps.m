@@ -67,7 +67,7 @@ end
 swps.startSweepsRelative=swps.startSweeps-swps.start+1;
 swps.interIndices=[];
 for n=1:swps.nSweeps
-    swps.indices(:,n)=swps.startSweeps(n):swps.startSweeps(n)+swps.useSweepLength;
+    swps.indices(:,n)=swps.startSweeps(n):swps.startSweeps(n)+swps.useSweepLength-1;
     swps.interIndices=[swps.interIndices swps.interStart(n):swps.interEnd(n)];
 end
 swps.allIndRelative=reshape(swps.indices,[],1)-swps.start+1;

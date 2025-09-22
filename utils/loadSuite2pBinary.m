@@ -22,24 +22,37 @@ function data = loadSuite2pBinary(ds, plane, start, stop)
 
 % Author: Georgios A. Keliris
 
-
-if isnumeric(plane)
-    p=plane;
-    plane=['plane', num2str(plane)];
-else
-    p=str2num(plane(6:end));
+if ~isstr(ds)
+    if isnumeric(plane)
+        p=plane;
+        plane=['plane', num2str(plane)];
+    else
+        p=str2num(plane(6:end));
+    end
 end
-    
+
 
 if isstr(ds)
-    fid = fopen(ds,'r')
+    fid = fopen(ds,'r');
+    try
+        % try to load ops.npy from the same folder as ds
+        d=dir(ds);
+        np = py.importlib.import_module('numpy');
+        ops = np.load('ops.npy', pyargs('allow_pickle',true));
+        ops_dict=ops.item();
+        Lx=double(ops_dict{'Lx'});
+        Ly=double(ops_dict{'Ly'});
+    catch
+        keyboard
+    end
 else
     ops = loadOps(ds);
     fid = fopen(fullfile(ops.fast_disk,'suite2p',plane,'data.bin'),'r');
+    Lx=ops.allLx(p+1);
+    Ly=ops.allLy(p+1);
 end
 
-Lx=ops.allLx(p+1);
-Ly=ops.allLy(p+1);
+
 
 if exist('start')
     status = fseek(fid,(start-1)*2*Lx*Ly,'bof'); %int16 is 2 bytes

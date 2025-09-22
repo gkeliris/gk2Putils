@@ -15,7 +15,13 @@ FTS_dots = gk_direct_retPhaseAmp(ds, false, true, stim, 0, false);
 % Note: The FTS_dots.amp should have the pixels that are modulated by the
 % dots and the FTS_dots.phs should have different phases for those pixels
 % depending on which dot they are driven by
-
+neg_ind=find(FTS_dots.phs<0);
+pos_ind=find(FTS_dots.phs>=0);
+FTS_dots.phs(neg_ind)=-FTS_dots.phs(neg_ind);
+FTS_dots.phs(pos_ind)=2*pi-FTS_dots.phs(pos_ind);
+% create mask
+FTS_dots.mask=zeros(size(FTS_dots.amp));
+FTS_dots.mask(FTS_dots.amp>0.5*max(FTS_dots.amp(:)))=1;
 
 %% Second way to analyze (average the images for each dot)
 % Note: for this we first need to convert the continuous time series to
@@ -62,3 +68,12 @@ bsl1=mean(ds.trials{1}(:,:,3:5,:),[3,4]);
 dot1_dF = (dot1-bsl1)./bsl1;
 
 
+
+dot3=mean(ds.trials{1}(:,:,8:27,:),[3,4]);
+
+% However this is the raw signal, probably is best to convert to DeltaF/F
+% One way to do this is to use the pre time of each dot as baseline
+bsl3=mean(ds.trials{1}(:,:,3:5,:),[3,4]);
+
+% and convert to deltaF/F
+dot3_dF = (dot3-bsl3)./bsl3;
