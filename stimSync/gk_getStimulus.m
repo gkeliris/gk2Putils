@@ -35,6 +35,8 @@ save(fullfile(setSesPath(ds),'matlabana','stim_t'),'stim_t');
 if isMeso
     frame_t = gk_getFrameTimes(h5, gk_getNumPlanes(ds));
 else
+    stimdur=median(diff(stim_t.onsets));
+    stim_t.offsets=stim_t.onsets+stimdur;
     frame_t = gk_getBrukerFrames(ds);
 end
 save(fullfile(setSesPath(ds),'matlabana','frame_t'),'frame_t');
@@ -43,28 +45,28 @@ stim.Times = gk_getStimFrameTimes(stim_t,frame_t);
 
 stim.expType=ds.expID;
 if isMeso
-if strcmp(ds.expID{1}(1:2),'DR')
-    load(fullfile(ds.matfolder,ds.matfile),'blockseq_DR15');
-    [stim.Values,~,stim.IDs]=unique(blockseq_DR15);
-elseif strcmp(ds.expID{1}(1:3),'bar')
-    stim.Values=stim.Times.block_trials{1};
-    stim.IDs=repmat(stim.Values,1, numel(stim.Times.block_trials))';
-elseif strcmp(ds.expID{1}(1:6),'FamNov')
-    load(fullfile(ds.matfolder,ds.matfile),'angles','angles1',...
-        'reversals','blocks','blocks_id');
-    stim.Values=[angles, angles1];
-    stim.IDs=[];
-    for b=1:blocks
-        stim.IDs=[stim.IDs; ones(reversals,1)*blocks_id(b)];
+    if strcmp(ds.expID{1}(1:2),'DR')
+        load(fullfile(ds.matfolder,ds.matfile),'blockseq_DR15');
+        [stim.Values,~,stim.IDs]=unique(blockseq_DR15);
+    elseif strcmp(ds.expID{1}(1:3),'bar')
+        stim.Values=stim.Times.block_trials{1};
+        stim.IDs=repmat(stim.Values,1, numel(stim.Times.block_trials))';
+    elseif strcmp(ds.expID{1}(1:6),'FamNov')
+        load(fullfile(ds.matfolder,ds.matfile),'angles','angles1',...
+            'reversals','blocks','blocks_id');
+        stim.Values=[angles, angles1];
+        stim.IDs=[];
+        for b=1:blocks
+            stim.IDs=[stim.IDs; ones(reversals,1)*blocks_id(b)];
+        end
+    elseif strcmp(ds.expID{1}(1:8),'Familiar')
+        load(fullfile(ds.matfolder,ds.matfile),'angles','reversals','blocks');
+        stim.Values=angles;
+        stim.IDs=ones(reversals*blocks,1)
     end
-elseif strcmp(ds.expID{1}(1:8),'Familiar')
-    load(fullfile(ds.matfolder,ds.matfile),'angles','reversals','blocks');
-    stim.Values=angles;
-    stim.IDs=ones(reversals*blocks,1)
-end
 else
-    stim.Values=repmat([0 1.5 6.25 12.5 25 50 100 0 0 0],1,5);
-    stim.IDs=repmat([0 1 2 3 4 5 6 0 0 0],1,5);
+    stim.Values=[0 1.5 6.25 12.5 25 50 100];
+    stim.IDs=repmat([1 2 3 4 5 6 7 1 1 1],1,5); stim.IDs=stim.IDs(2:end);
 end
 % d=dir(fullfile(setSesPath(ds),'matlabana','Contrast*.mat'));
 % load(fullfile(d.folder,d.name),'Stims','StimTypes','angles');

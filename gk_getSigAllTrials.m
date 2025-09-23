@@ -5,7 +5,11 @@ function sig = gk_getSigAllTrials(sigMat, stim, t_before_sec, t_after_sec, calcD
 if nargin<5
     calcDF=true;
 end
-
+% remove trailing digits
+match = regexp(stim.expType, '\d+$', 'match');
+if ~isempty(match)
+    stim.expType = regexprep(stim.expType, '\d+$', '');
+end
 sig.expType=stim.expType;
 
 z=1; %for multiplane ROIs that could have different timing, we use the 1st
@@ -75,7 +79,7 @@ sig.trials_ONresp_trial = squeeze(mean(sig.trials_dF_F(:,min(t_before_frames+2,t
 
 sig.trials_dF_F0_bsl = (sig.trials ./ repmat(F0_bsl,1,size(sig.trials,2),size(sig.trials,3))) - subM;
 baseline = mean(sig.trials_dF_F0_bsl(:,t_before_frames-4:t_before_frames,:),2);
-sig.trials_dF_F0_bsl = sig.trials_dF_F0_bsl - repmat(baseline,1,28,1);
+sig.trials_dF_F0_bsl = sig.trials_dF_F0_bsl - repmat(baseline,1,size(sig.trials_dF_F0_bsl,2),1);
 sig.trials_ONresp = squeeze(mean(sig.trials_dF_F0_bsl(:,t_before_frames+3:t_before_frames+t_dur+t_ext,:),2));
 %sig.trials_ONresp = squeeze(mean(sig.trials(:,t_before_frames+3:t_before_frames+t_dur+t_ext,:),2));
 %sig.trials_OFFresp = squeeze(mean(sig.trials_dF_F(:,t_before_frames+t_dur+3:t_before_frames+t_dur+t_after_frames-3,:),2));
