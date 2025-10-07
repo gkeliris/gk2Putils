@@ -48,6 +48,8 @@ if strcmp(fitChoice,'all')
 end
 yline([0],'--'); hold on;
 errorbar(stim.Values,sig.Mean,sig.Sem,'ko','MarkerFaceColor',[0 0 0]);
+%errorbar(stim.Values,sig.Mean,sig.Sem,'bo','MarkerFaceColor',[0 0 1]);
+
 %xlabel(xlabelStr);
 %ylabel('\DeltaF/F');
 title(['CELL#: ' num2str(cellNum) ', ROI#: ' num2str(xpr.cellIDs(cellNum))]);

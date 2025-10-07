@@ -1,5 +1,5 @@
-function gk_plotStimulus(ds)
-% USAGE: gk_plotStimulus(ds)
+function gk_plotStimulus(ds, cmapname)
+% USAGE: gk_plotStimulus(ds, [cmapname]))
 %
 % This is a function that visualizes the stimulus in time using colored
 % bars of different shades for different stimulus intensities
@@ -21,15 +21,24 @@ figure;
 scrsize=get(0,'Screensize');
 set(gcf, 'Position',[scrsize(4)*4/5 1 scrsize(3) scrsize(4)/5]);
 hold on;
-map=colormap(cool(N));
+if nargin<2
+    %map=colormap(cool(N));
+    for s=1:N
+        map(s,:)=[1 0.95-0.95*(s-1)/(N-1) 0.95-0.95*(s-1)/(N-1)];
+    end
+else
+    map=colormap(eval([cmapname '(' num2str(N) ')']));
+end
+
 for s=1:N
     ind=find(stim.IDs==s);
-    area(onoff(:,ind(1)),amp(:,ind(1)),'FaceColor',[1 0.95-0.95*(s-1)/(N-1) 0.95-0.95*(s-1)/(N-1)],'LineStyle','none')
+    area(onoff(:,ind(1)),amp(:,ind(1)),'FaceColor',map(s,:),'FaceAlpha',0.5, 'LineStyle','none')
 end
 for s=1:N
     ind=find(stim.IDs==s);
-    area(onoff(:,ind(2:end)),amp(:,ind(2:end)),'FaceColor',[1 0.95-0.95*(s-1)/(N-1) 0.95-0.95*(s-1)/(N-1)],'LineStyle','none')
+    area(onoff(:,ind(2:end)),amp(:,ind(2:end)),'FaceColor',map(s,:),'FaceAlpha',0.75,'LineStyle','none')
 end
+
 if (strcmpi(ds.cohort,'coh1') || strcmpi(ds.cohort,'coh2')) && strcmpi(ds.expID,'contrast') || strcmpi(ds.expID,'contrast2')
     try
         xline(stim.Times.onsets(1)-1,'b--');

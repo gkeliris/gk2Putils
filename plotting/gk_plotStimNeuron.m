@@ -10,5 +10,5 @@ if nargin<3
     plane='combined';
 end
 ds = gk_selectDS(ds);
-gk_plotStimulus(ds);
+gk_plotStimulus(ds,'hsv');
 gk_plotROI(ds,'F',roiNum,plane);
