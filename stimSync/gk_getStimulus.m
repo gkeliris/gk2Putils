@@ -66,7 +66,7 @@ if isMeso
     end
 else
     stim.Values=[0 1.5 6.25 12.5 25 50 100];
-    stim.IDs=repmat([1 2 3 4 5 6 7 1 1 1],1,5); stim.IDs=stim.IDs(2:end);
+    stim.IDs=repmat([1 2 3 4 5 6 7 1 1 1],1,5); %stim.IDs=stim.IDs(2:end);
 end
 % d=dir(fullfile(setSesPath(ds),'matlabana','Contrast*.mat'));
 % load(fullfile(d.folder,d.name),'Stims','StimTypes','angles');
