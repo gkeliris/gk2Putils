@@ -73,3 +73,29 @@ axis equal; axis off
 ylim([1290 3129])
 caxis([0 200])
 
+
+%% VIDEO LIDA
+v = VideoWriter('/mnt/4TB_SSD/Lida/test.avi');
+v.FrameRate=5;
+open(v)
+
+for i=1:100
+    imagesc(data(:,:,i)); axis image; caxis([0 100]); colormap gray
+    axis off;
+    frame = getframe(gcf);
+    writeVideo(v,frame);
+end
+close(v)
+
+% average every 5 frames
+v = VideoWriter('/mnt/4TB_SSD/Lida/test2.avi');
+v.FrameRate=5;
+open(v)
+
+for i=1:5:6000
+    imagesc(mean(doubledata(:,:,i:i+4),3)); axis image; caxis([0 100]); colormap gray
+    axis off;
+    frame = getframe(gcf);
+    writeVideo(v,frame);
+end
+close(v)
